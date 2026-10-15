@@ -1,0 +1,138 @@
+version: "3.9"
+
+services:
+  mediator:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.mediator
+    container_name: aegisbay-mediator
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - BOUNDED_RELEASE_WINDOW_MS=1000
+      - CONSTANT_TIME_RELEASE=true
+      - DATABASE_PATH=/app/data/aegisbay_ledger.db
+      - CHECKPOINT_EXPORT_PATH=/app/data/latest_checkpoint.json
+    volumes:
+      - ./data:/app/data
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:./infra/seccomp-enclave.json
+    cap_drop:
+      - ALL
+    read_only: false
+    pids_limit: 256
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1024M
+    networks:
+      red_net:
+        ipv4_address: 172.28.1.2
+      blue_net:
+        ipv4_address: 172.28.2.2
+      llm_net:
+        ipv4_address: 172.28.3.2
+
+  red_workspace:
+    image: alpine:3.20
+    container_name: aegisbay-red-workspace
+    command: ["sleep", "infinity"]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:./infra/seccomp-enclave.json
+    cap_drop:
+      - ALL
+    read_only: true
+    pids_limit: 64
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    networks:
+      red_net:
+        ipv4_address: 172.28.1.10
+
+  blue_workspace:
+    image: alpine:3.20
+    container_name: aegisbay-blue-workspace
+    command: ["sleep", "infinity"]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:./infra/seccomp-enclave.json
+    cap_drop:
+      - ALL
+    read_only: true
+    pids_limit: 64
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    networks:
+      blue_net:
+        ipv4_address: 172.28.2.10
+
+  llm_enclave:
+    image: alpine:3.20
+    container_name: aegisbay-llm-enclave
+    command: ["sleep", "infinity"]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp:./infra/seccomp-enclave.json
+    cap_drop:
+      - ALL
+    read_only: true
+    pids_limit: 128
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    networks:
+      llm_net:
+        ipv4_address: 172.28.3.10
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: aegisbay-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - mediator
+
+networks:
+  red_net:
+    driver: bridge
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.1.0/24
+          gateway: 172.28.1.1
+  blue_net:
+    driver: bridge
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.2.0/24
+          gateway: 172.28.2.1
+  llm_net:
+    driver: bridge
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.3.0/24
+          gateway: 172.28.3.1

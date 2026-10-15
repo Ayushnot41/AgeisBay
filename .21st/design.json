@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "project": {
+    "name": "AegisBay",
+    "productType": "SecOps Cybersecurity & Zero-Trust AI Testing Enclave Workbench",
+    "stack": ["nextjs-15", "react-19", "tailwind", "framer-motion", "recharts", "fastapi"]
+  },
+  "sources": {
+    "tokens": ["DESIGN.md"],
+    "components": [],
+    "assets": [],
+    "instructions": [
+      "DESIGN.md"
+    ]
+  },
+  "design": {
+    "colorMode": "dark",
+    "colors": {
+      "canvas": "#07090E",
+      "panel": "#0D111A",
+      "card": "#151C28",
+      "border": "#1E293B",
+      "borderFocus": "#334155",
+      "statusPass": "#10B981",
+      "statusFail": "#EF4444",
+      "statusWarn": "#F59E0B",
+      "cryptoCyan": "#06B6D4",
+      "enclaveBlue": "#3B82F6"
+    },
+    "typography": {
+      "display": "Inter, -apple-system, sans-serif",
+      "mono": "JetBrains Mono, monospace",
+      "features": "tabular-nums"
+    },
+    "spacing": {
+      "unit": "4px"
+    },
+    "radius": {
+      "card": "6px",
+      "button": "4px",
+      "badge": "2px"
+    },
+    "shadows": {
+      "recessed": "inset 0 2px 4px 0 rgba(0,0,0,0.4)",
+      "elevated": "0 4px 20px -2px rgba(0,0,0,0.5), inset 0 1px 0 0 rgba(255,255,255,0.05)"
+    },
+    "motion": {
+      "stiffness": 380,
+      "damping": 30,
+      "mass": 0.8
+    },
+    "density": "high"
+  },
+  "components": {
+    "installed": [],
+    "preferredPrimitives": ["lucide-react", "framer-motion", "recharts"],
+    "patterns": [
+      "4-Panel Industrial SecOps Grid",
+      "Top Telemetry Ribbon",
+      "Interactive SVG Topology DAG",
+      "4-Leaf Merkle Provenance Tree with 1-Bit SQLite Tamper Trigger",
+      "Paired Fault Ablation Matrix"
+    ]
+  },
+  "constraints": {
+    "must": [
+      "Zero emojis across all components, badges, and tooltips",
+      "Human-crafted high-density industrial telemetry styling",
+      "Monospace tabular numerals for all hashes, latencies, timestamps, and IPs",
+      "Sub-millisecond state transitions with interruptible spring physics",
+      "All rendered data must originate from live FastAPI endpoints"
+    ],
+    "avoid": [
+      "AI slop: generic rounded cartoon cards, pastel gradients, marketing fluff",
+      "Hardcoded mock data in React components",
+      "Marketing landing pages on route '/'",
+      "Non-tabular numbers that cause layout shifts on live data updates"
+    ]
+  },
+  "decisions": [
+    "Selected Industrial SecOps Dark Mode (#07090E canvas, #0D111A wells, #151C28 cards)",
+    "Engineered 4-panel workbench layout with top telemetry ribbon",
+    "Enabled 1-click SQLite tamper simulation to prove cryptographic Merkle verification"
+  ],
+  "evidence": [
+    {
+      "fact": "project.instructions",
+      "source": "DESIGN.md"
+    }
+  ],
+  "generatedAt": "2026-10-15T16:20:00.000Z"
+}
