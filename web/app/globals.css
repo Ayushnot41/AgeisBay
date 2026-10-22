@@ -5,10 +5,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 :root {
-  --color-canvas-obsidian: #07090E;
-  --color-panel-recessed: #0D111A;
-  --color-card-elevated: #151C28;
+  --color-canvas-obsidian: #06080D;
+  --color-panel-recessed: #0B0F17;
+  --color-card-elevated: #111722;
+  --color-card-subtle: #161E2E;
   --color-border-hairline: #1E293B;
+  --color-border-active: #334155;
   --color-status-pass: #10B981;
   --color-status-fail: #EF4444;
   --color-status-warn: #F59E0B;
@@ -18,10 +20,15 @@
 
 body {
   background-color: var(--color-canvas-obsidian);
-  color: #F8FAFC;
+  color: #E2E8F0;
   font-family: 'Inter', -apple-system, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.03) 0%, transparent 45%),
+    linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
 }
 
 /* Strict Tabular Numerals for Monospace Metrics */
@@ -33,17 +40,57 @@ body {
 
 /* Hardware-like Recessed Telemetry Well */
 .telemetry-well {
-  background-color: #0D111A;
-  border: 1px solid #1E293B;
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  background-color: #0A0E16;
+  border: 1px solid #1A2333;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 
-/* Elevated Tactile Card with 1px Specular Top Edge */
+/* Elevated Tactile Card with 1px Specular Top Edge (21st.dev Depth UI) */
 .card-elevated {
-  background-color: #151C28;
-  border: 1px solid #1E293B;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+  background-color: #0F1622;
+  border: 1px solid #1E2A3C;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.card-elevated-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-elevated-hover:hover {
+  border-color: #2D3D54;
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* 3D Isometric Viewport Container */
+.perspective-1000 {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+.isometric-stack {
+  transform: rotateX(25deg) rotateZ(-12deg);
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.isometric-stack:hover {
+  transform: rotateX(20deg) rotateZ(-8deg);
+}
+
+/* Scanline Overlay for Industrial SecOps HUD */
+.scanlines {
+  position: relative;
+}
+.scanlines::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.4;
 }
 
 /* Custom Scrollbar for dense SecOps grids */
@@ -52,7 +99,7 @@ body {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #07090E;
+  background: #06080D;
 }
 ::-webkit-scrollbar-thumb {
   background: #1E293B;
@@ -62,12 +109,22 @@ body {
   background: #334155;
 }
 
-/* Subtle cryptographic pulse */
-@keyframes cryptoPulse {
-  0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.4)); }
-  50% { opacity: 1; filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.8)); }
+/* Sub-millisecond Hardware Radar Sweep */
+@keyframes radarSweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.animate-crypto-pulse {
-  animation: cryptoPulse 2.5s infinite ease-in-out;
+.animate-radar {
+  animation: radarSweep 4s linear infinite;
+}
+
+/* Constant-Time Laser Pulse */
+@keyframes laserPulse {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-laser {
+  animation: laserPulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }

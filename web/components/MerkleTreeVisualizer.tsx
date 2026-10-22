@@ -1,4 +1,5 @@
-"use strict";
+"use client";
+
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EvaluationRun, simulateTamper, restoreTamper } from "@/lib/api";
@@ -13,7 +14,10 @@ import {
   FileCode,
   Flame,
   Undo2,
-  Lock
+  Lock,
+  Binary,
+  Layers,
+  ChevronDown
 } from "lucide-react";
 
 interface Props {
@@ -77,11 +81,11 @@ export default function MerkleTreeVisualizer({
   }
 
   return (
-    <div className="card-elevated rounded-lg p-3.5 flex flex-col h-full">
+    <div className="card-elevated rounded-lg p-3.5 flex flex-col h-full border border-[#1E2A3C] bg-[#0B0F17]">
       {/* Header */}
-      <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-hairline">
+      <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[#1E293B]">
         <div className="flex items-center gap-2">
-          <GitCommit className="w-4 h-4 text-status-cyan" />
+          <GitCommit className="w-4 h-4 text-cyan-400" />
           <h2 className="text-xs font-bold uppercase tracking-wider font-mono text-slate-200">
             PANEL D: 4-LEAF MERKLE RECEIPT &amp; ED25519 INSPECTOR
           </h2>
@@ -93,7 +97,7 @@ export default function MerkleTreeVisualizer({
               const found = runs.find((r) => r.run_id === e.target.value);
               if (found) onSelectRun(found);
             }}
-            className="bg-panel border border-hairline rounded px-2 py-0.5 text-[11px] font-mono text-slate-200 outline-none focus:border-status-cyan"
+            className="bg-[#07090E] border border-[#1E293B] rounded px-2 py-0.5 text-[10px] font-mono text-slate-200 outline-none focus:border-cyan-400"
           >
             {runs.map((r) => (
               <option key={r.run_id} value={r.run_id}>
@@ -101,222 +105,147 @@ export default function MerkleTreeVisualizer({
               </option>
             ))}
           </select>
+
+          {isTampered ? (
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-red-950/80 text-red-300 border border-red-500 flex items-center gap-1 animate-pulse">
+              <AlertOctagon className="w-3 h-3 text-red-400" />
+              TAMPER DETECTED
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              AUTHENTIC
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Main Interactive Tree Container */}
-      <div className="telemetry-well rounded-md p-3 flex-1 flex flex-col justify-between overflow-y-auto min-h-[260px]">
-        {/* Tamper Warning Banner if 1-bit mutation active */}
-        <AnimatePresence>
-          {isTampered && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mb-2 p-2 rounded bg-red-950/80 border border-red-600 text-red-200 text-[11px] font-mono flex items-center justify-between"
+      {/* Merkle Tree DAG Container */}
+      <div className="telemetry-well rounded p-2.5 flex-1 flex flex-col justify-between overflow-y-auto max-h-[300px]">
+        {/* Tier 1: Merkle Root & Ed25519 Signature */}
+        <div className="flex flex-col gap-1.5 p-2 rounded bg-black/40 border border-[#1E293B]">
+          <div className="flex items-center justify-between text-[10px] font-mono">
+            <span className="flex items-center gap-1.5 text-cyan-300 font-bold">
+              <Lock className="w-3.5 h-3.5 text-cyan-400" />
+              MERKLE ROOT HASH
+            </span>
+            <button
+              onClick={() => copyText(run.merkle_root, "root")}
+              className="flex items-center gap-1 text-[9px] text-slate-400 hover:text-slate-200 transition-colors"
             >
-              <div className="flex items-center gap-2">
-                <AlertOctagon className="w-4 h-4 text-status-fail animate-pulse" />
-                <div>
-                  <span className="font-bold">1-BIT SQLITE TAMPER ACTIVE:</span> Result record
-                  mutated. Leaf 3 hash failed recomputation!
-                </div>
-              </div>
-              <button
-                onClick={handleRestoreTamper}
-                disabled={isTampering}
-                className="px-2 py-0.5 rounded bg-panel hover:bg-panel-hover text-status-pass border border-hairline font-bold flex items-center gap-1"
-              >
-                <Undo2 className="w-3 h-3" /> RESTORE
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* 1. Merkle Root + Ed25519 Signature Node */}
-        <div className="flex flex-col items-center">
-          <div
-            className={`w-full max-w-md p-2 rounded border text-center transition-all ${
-              isTampered
-                ? "bg-red-950/40 border-red-500 shadow-glowFail"
-                : "bg-cyan-950/30 border-status-cyan shadow-glowCyan"
-            }`}
-          >
-            <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1">
-              <span className="flex items-center gap-1 font-bold text-slate-200">
-                <ShieldCheck
-                  className={`w-3.5 h-3.5 ${
-                    isTampered ? "text-status-fail" : "text-status-pass"
-                  }`}
-                />
-                MERKLE ROOT (ED25519 ATTESTED)
-              </span>
-              <span
-                className={`font-bold ${
-                  isTampered ? "text-status-fail" : "text-status-pass"
-                }`}
-              >
-                {isTampered ? "SIGNATURE INVALID" : "VALID ENCLAVE SIG"}
-              </span>
-            </div>
-            <div className="font-mono text-[11px] text-slate-200 truncate select-all">
-              {run.merkle_root}
-            </div>
-            <div className="mt-1 pt-1 border-t border-hairline/60 flex items-center justify-between text-[9px] font-mono text-slate-400">
-              <span className="truncate max-w-[280px]">SIG: {run.ed25519_signature}</span>
-              <button
-                onClick={() => copyText(run.merkle_root, "root")}
-                className="hover:text-slate-200"
-              >
-                {copiedKey === "root" ? (
-                  <Check className="w-3 h-3 text-status-pass" />
-                ) : (
-                  <Copy className="w-3 h-3" />
-                )}
-              </button>
-            </div>
+              {copiedKey === "root" ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              <span>{copiedKey === "root" ? "COPIED" : "COPY HASH"}</span>
+            </button>
+          </div>
+          <div className="font-mono text-[10px] text-slate-200 break-all select-all bg-[#07090E] p-1.5 rounded border border-[#1E293B]">
+            {run.merkle_root}
           </div>
 
-          {/* Tree Trunk SVG Connectors */}
-          <svg className="w-48 h-5 my-0.5" viewBox="0 0 200 20">
-            <line x1="100" y1="0" x2="50" y2="20" stroke="#1E293B" strokeWidth="1.5" />
-            <line
-              x1="100"
-              y1="0"
-              x2="150"
-              y2="20"
-              stroke={isTampered ? "#EF4444" : "#1E293B"}
-              strokeWidth="1.5"
-            />
-          </svg>
+          <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 pt-1 border-t border-[#1E293B]/60">
+            <span className="truncate">
+              ED25519 SIGNATURE: <span className="text-slate-300 font-mono">{run.ed25519_signature?.substring(0, 32)}...</span>
+            </span>
+            <button
+              onClick={() => copyText(run.ed25519_signature, "sig")}
+              className="text-cyan-400 hover:text-cyan-300 ml-2"
+            >
+              {copiedKey === "sig" ? "COPIED" : "COPY SIG"}
+            </button>
+          </div>
         </div>
 
-        {/* 2. Branch Pair Nodes */}
-        <div className="grid grid-cols-2 gap-3 max-w-xl mx-auto w-full my-1">
-          {/* Branch A (L1 + L2) */}
-          <div className="bg-panel p-2 rounded border border-hairline text-[10px] font-mono">
-            <div className="flex items-center justify-between text-slate-400 mb-0.5">
-              <span className="font-semibold text-status-cyan">BRANCH A (L1 + L2)</span>
-              <span className="text-status-pass">PASS</span>
+        {/* Tree Connector Arrows */}
+        <div className="flex justify-around text-slate-600 text-[10px] py-1">
+          <span>▲ BRANCH A</span>
+          <span>▲ BRANCH B</span>
+        </div>
+
+        {/* Tier 2: Intermediate Branches A and B */}
+        <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+          <div className="p-1.5 rounded bg-black/30 border border-[#1E293B]">
+            <div className="text-slate-400 text-[9px] mb-0.5">BRANCH A (LEAF 01 + 02)</div>
+            <div className="text-slate-300 truncate select-all">{run.branch_a}</div>
+          </div>
+          <div className="p-1.5 rounded bg-black/30 border border-[#1E293B]">
+            <div className="text-slate-400 text-[9px] mb-0.5">BRANCH B (LEAF 03 + 04)</div>
+            <div className="text-slate-300 truncate select-all">{run.branch_b}</div>
+          </div>
+        </div>
+
+        {/* Tree Connector Arrows */}
+        <div className="flex justify-around text-slate-600 text-[10px] py-1">
+          <span>▲ CONFIG</span>
+          <span>▲ CHECKS</span>
+          <span>▲ RESULT</span>
+          <span>▲ STATUS</span>
+        </div>
+
+        {/* Tier 3: 4 Cryptographic Leaves */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px] font-mono">
+          {/* Leaf 01: Config */}
+          <div
+            onClick={() => setActiveLeafDetail("config")}
+            className="p-1.5 rounded bg-black/40 border border-[#1E293B] hover:border-cyan-500/50 cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-[9px] text-slate-400 mb-0.5">
+              <span>LEAF 01: CONFIG</span>
+              <Eye className="w-2.5 h-2.5 text-cyan-400" />
             </div>
-            <div className="text-slate-300 truncate text-[10px]">{run.branch_a}</div>
+            <div className="text-slate-300 truncate">{run.leaf_01_config}</div>
           </div>
 
-          {/* Branch B (L3 + L4) */}
+          {/* Leaf 02: Checks */}
           <div
-            className={`p-2 rounded border text-[10px] font-mono transition-all ${
+            onClick={() => setActiveLeafDetail("checks")}
+            className={`p-1.5 rounded border cursor-pointer transition-all ${
               isTampered
                 ? "bg-red-950/40 border-red-500 text-red-200"
-                : "bg-panel border-hairline text-slate-300"
+                : "bg-black/40 border-[#1E293B] hover:border-cyan-500/50"
             }`}
           >
-            <div className="flex items-center justify-between mb-0.5">
-              <span
-                className={`font-semibold ${
-                  isTampered ? "text-status-fail" : "text-status-cyan"
-                }`}
-              >
-                BRANCH B (L3 + L4)
-              </span>
-              <span className={isTampered ? "text-status-fail font-bold" : "text-status-pass"}>
-                {isTampered ? "BROKEN" : "PASS"}
-              </span>
+            <div className="flex items-center justify-between text-[9px] text-slate-400 mb-0.5">
+              <span>LEAF 02: CHECKS</span>
+              <Eye className="w-2.5 h-2.5 text-cyan-400" />
             </div>
-            <div className="truncate text-[10px]">{run.branch_b}</div>
+            <div className="text-slate-300 truncate">{run.leaf_02_checks}</div>
+          </div>
+
+          {/* Leaf 03: Result */}
+          <div
+            onClick={() => setActiveLeafDetail("result")}
+            className="p-1.5 rounded bg-black/40 border border-[#1E293B] hover:border-cyan-500/50 cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-[9px] text-slate-400 mb-0.5">
+              <span>LEAF 03: RESULT</span>
+              <Eye className="w-2.5 h-2.5 text-cyan-400" />
+            </div>
+            <div className="text-slate-300 truncate">{run.leaf_03_result}</div>
+          </div>
+
+          {/* Leaf 04: Status */}
+          <div
+            onClick={() => setActiveLeafDetail("status")}
+            className="p-1.5 rounded bg-black/40 border border-[#1E293B] hover:border-cyan-500/50 cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-[9px] text-slate-400 mb-0.5">
+              <span>LEAF 04: STATUS</span>
+              <Eye className="w-2.5 h-2.5 text-cyan-400" />
+            </div>
+            <div className="text-slate-300 truncate">{run.leaf_04_status}</div>
           </div>
         </div>
 
-        {/* Tree Branch SVG Connectors */}
-        <div className="grid grid-cols-2 gap-3 max-w-xl mx-auto w-full">
-          <svg className="w-full h-4" viewBox="0 0 200 16">
-            <line x1="100" y1="0" x2="35" y2="16" stroke="#1E293B" strokeWidth="1.5" />
-            <line x1="100" y1="0" x2="165" y2="16" stroke="#1E293B" strokeWidth="1.5" />
-          </svg>
-          <svg className="w-full h-4" viewBox="0 0 200 16">
-            <line
-              x1="100"
-              y1="0"
-              x2="35"
-              y2="16"
-              stroke={isTampered ? "#EF4444" : "#1E293B"}
-              strokeWidth="1.5"
-            />
-            <line x1="100" y1="0" x2="165" y2="16" stroke="#1E293B" strokeWidth="1.5" />
-          </svg>
-        </div>
-
-        {/* 3. The 4 Merkle Leaves */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-[10px]">
-          {/* Leaf 1: Config */}
-          <div
-            onClick={() => setActiveLeafDetail(activeLeafDetail === "config" ? null : "config")}
-            className="p-2 rounded bg-card hover:bg-card-elevated border border-hairline cursor-pointer transition-colors"
-          >
-            <div className="flex items-center justify-between text-slate-400 mb-0.5">
-              <span className="font-bold text-slate-200">LEAF 1: CONFIG</span>
-              <span className="text-status-pass">PASS</span>
-            </div>
-            <div className="text-slate-400 truncate">{run.leaf_01_config}</div>
-            <div className="mt-1 text-[9px] text-slate-500">Run ID + Commitments</div>
-          </div>
-
-          {/* Leaf 2: Checks */}
-          <div
-            onClick={() => setActiveLeafDetail(activeLeafDetail === "checks" ? null : "checks")}
-            className="p-2 rounded bg-card hover:bg-card-elevated border border-hairline cursor-pointer transition-colors"
-          >
-            <div className="flex items-center justify-between text-slate-400 mb-0.5">
-              <span className="font-bold text-slate-200">LEAF 2: CHECKS</span>
-              <span className="text-status-pass">PASS</span>
-            </div>
-            <div className="text-slate-400 truncate">{run.leaf_02_checks}</div>
-            <div className="mt-1 text-[9px] text-slate-500">6 Isolation Checks</div>
-          </div>
-
-          {/* Leaf 3: Result (Tamper Target) */}
-          <div
-            onClick={() => setActiveLeafDetail(activeLeafDetail === "result" ? null : "result")}
-            className={`p-2 rounded border cursor-pointer transition-all ${
-              isTampered
-                ? "bg-red-950/60 border-red-500 text-red-200 shadow-glowFail animate-pulse"
-                : "bg-card hover:bg-card-elevated border-hairline text-slate-200"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-0.5">
-              <span className="font-bold">LEAF 3: RESULT</span>
-              <span className={isTampered ? "text-status-fail font-bold" : "text-status-pass"}>
-                {isTampered ? "FAIL" : "PASS"}
-              </span>
-            </div>
-            <div className="truncate text-slate-400">{run.leaf_03_result}</div>
-            <div className="mt-1 text-[9px] text-slate-500">Safety Score + Latency</div>
-          </div>
-
-          {/* Leaf 4: Status */}
-          <div
-            onClick={() => setActiveLeafDetail(activeLeafDetail === "status" ? null : "status")}
-            className="p-2 rounded bg-card hover:bg-card-elevated border border-hairline cursor-pointer transition-colors"
-          >
-            <div className="flex items-center justify-between text-slate-400 mb-0.5">
-              <span className="font-bold text-slate-200">LEAF 4: STATUS</span>
-              <span className="text-status-pass">PASS</span>
-            </div>
-            <div className="text-slate-400 truncate">{run.leaf_04_status}</div>
-            <div className="mt-1 text-[9px] text-slate-500">State + Gated Score</div>
-          </div>
-        </div>
-
-        {/* Selected Leaf Canonical JSON Drawer */}
+        {/* Leaf Inspection Pre-image Modal Drawer */}
         <AnimatePresence>
           {activeLeafDetail && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-2 p-2.5 rounded bg-panel border border-hairline text-[10px] font-mono text-slate-300"
+              className="mt-2 p-2 rounded bg-[#070A10] border border-cyan-500/40 text-[10px] font-mono"
             >
-              <div className="flex items-center justify-between mb-1 text-slate-400 font-bold">
-                <span className="flex items-center gap-1 text-status-cyan">
+              <div className="flex items-center justify-between text-cyan-400 pb-1 mb-1 border-b border-[#1E293B]">
+                <span className="flex items-center gap-1 font-bold">
                   <FileCode className="w-3 h-3" /> CANONICAL PRE-IMAGE: {activeLeafDetail.toUpperCase()}
                 </span>
                 <button
@@ -334,30 +263,31 @@ export default function MerkleTreeVisualizer({
         </AnimatePresence>
 
         {/* Bottom Tamper Action Controls */}
-        <div className="pt-2 mt-2 border-t border-hairline/60 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono">
+        <div className="pt-2 mt-2 border-t border-[#1E293B]/80 flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono">
           <div className="text-slate-400">
-            AUDIT TRAIL: <span className="text-slate-200">{run.created_at}</span>
+            RECORDED: <span className="text-slate-200">{run.created_at}</span>
           </div>
-
-          <div className="flex items-center gap-2">
-            {!isTampered ? (
-              <button
-                onClick={handleSimulateTamper}
-                disabled={isTampering}
-                className="px-2.5 py-1 rounded text-red-300 bg-red-950/60 hover:bg-red-900/60 border border-red-800/60 font-bold flex items-center gap-1.5 transition-colors active:scale-95"
-              >
-                <Flame className="w-3.5 h-3.5 text-status-fail" />
-                <span>SIMULATE 1-BIT SQLITE TAMPER</span>
-              </button>
-            ) : (
-              <button
+          <div className="flex items-center gap-1.5">
+            {isTampered ? (
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={handleRestoreTamper}
                 disabled={isTampering}
-                className="px-2.5 py-1 rounded text-status-pass bg-emerald-950/70 hover:bg-emerald-900/70 border border-emerald-800/60 font-bold flex items-center gap-1.5 transition-colors active:scale-95 shadow-glowPass"
+                className="flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 font-bold transition-all shadow-[0_0_10px_rgba(16,185,129,0.3)]"
               >
-                <Undo2 className="w-3.5 h-3.5" />
-                <span>RESTORE AUTHENTIC CRYPTOGRAPHIC STATE</span>
-              </button>
+                <Undo2 className="w-3 h-3" />
+                <span>RESTORE CRYPTOGRAPHIC INTEGRITY</span>
+              </motion.button>
+            ) : (
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSimulateTamper}
+                disabled={isTampering}
+                className="flex items-center gap-1 px-2.5 py-1 rounded bg-red-950 hover:bg-red-900 text-red-300 border border-red-700/60 font-bold transition-all"
+              >
+                <Flame className="w-3 h-3 text-red-400" />
+                <span>SIMULATE 1-BIT SQLITE TAMPER</span>
+              </motion.button>
             )}
           </div>
         </div>
