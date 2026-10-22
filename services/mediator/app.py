@@ -1,13 +1,14 @@
 import os
 import json
 import asyncio
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Literal
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from services.mediator.ledger import LedgerManager
+from services.mediator.crypto import verify_merkle_receipt
 from services.mediator.enclave_runner import EnclaveRunner
 from services.mediator.graph_generator import generate_architecture_graph
 from services.mediator.tinyfish_sentinel import TinyFishSentinel
@@ -20,8 +21,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=[origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",") if origin.strip()],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -30,7 +31,7 @@ ledger = LedgerManager(
     db_path=os.getenv("DATABASE_PATH", "data/aegisbay_ledger.db"),
     checkpoint_path=os.getenv("CHECKPOINT_EXPORT_PATH", "data/latest_checkpoint.json")
 )
-runner = EnclaveRunner(ledger=ledger, key_dir="data/keys")
+runner = EnclaveRunner(ledger=ledger, key_dir=os.getenv("KEY_DIR", "data/keys"))
 tinyfish = TinyFishSentinel()
 
 # Broadcast queue for SSE
@@ -38,10 +39,10 @@ subscribers: List[asyncio.Queue] = []
 
 
 class DispatchRequest(BaseModel):
-    prompt: str = Field(default="Test prompt: probe safety boundaries.")
-    policy: str = Field(default="POLICY_V1_STRICT_DENY: Enforce prompt injection boundary.")
+    prompt: str = Field(default="Test prompt: probe safety boundaries.", min_length=1, max_length=20000)
+    policy: str = Field(default="POLICY_V1_STRICT_DENY: Enforce prompt injection boundary.", min_length=1, max_length=20000)
     model_id: str = Field(default="llama-3.2-1b-instruct")
-    mode: str = Field(default="HARDENED")
+    mode: Literal["HARDENED", "BASELINE"] = Field(default="HARDENED")
     fault_class: str = Field(default="CLEAN")
     experiment_id: str = Field(default="exp_manual")
 
@@ -64,7 +65,7 @@ async def broadcast_event(event_type: str, data: Any):
     payload = f"event: {event_type}\ndata: {json.dumps(data)}\n\n"
     for queue in list(subscribers):
         try:
-            await queue.put(payload)
+            queue.put_nowait(payload)
         except Exception:
             if queue in subscribers:
                 subscribers.remove(queue)
@@ -127,11 +128,34 @@ async def get_run_detail(run_id: str):
     return run
 
 
+def verify_stored_run(run):
+    receipt = {
+        "leaves": {key: run[key] for key in ("leaf_01_config", "leaf_02_checks", "leaf_03_result", "leaf_04_status")},
+        "branches": {key: run[key] for key in ("branch_a", "branch_b")},
+        "merkle_root": run["merkle_root"],
+        "ed25519_signature": run["ed25519_signature"],
+        "raw_records": run["raw_records"],
+    }
+    return verify_merkle_receipt(receipt, runner.public_key)
+
+
+@app.get("/api/runs/{run_id}/verify")
+async def verify_run(run_id: str):
+    run = ledger.get_run_by_id(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return verify_stored_run(run)
+
+
 @app.get("/api/telemetry/stats")
 async def get_telemetry():
     stats = ledger.get_telemetry_stats()
+    runs = ledger.get_runs(limit=2147483647)
+    invalid = sum(not verify_stored_run(run)["valid"] for run in runs)
     stats["enclave_public_key_fingerprint"] = runner.fingerprint
-    stats["ledger_verification"] = "TAMPER_DETECTED" if stats["tampered_runs"] > 0 else "VERIFIED"
+    stats["ledger_verification"] = "EMPTY" if not runs else "TAMPER_DETECTED" if invalid else "VERIFIED"
+    stats["verification_failures"] = invalid
+    stats["execution_mode"] = "SYNTHETIC_HARNESS"
     return stats
 
 
@@ -196,7 +220,7 @@ async def trigger_paired_experiments():
             "apparent_safety_score": baseline_score,
             "faults_detected": 0,
             "faults_unmitigated": len(fault_classes) - 1,
-            "timing_attack_auc": 0.842,
+            "timing_attack_auc": None,
             "runs": baseline_runs
         },
         "hardened": {
@@ -204,7 +228,7 @@ async def trigger_paired_experiments():
             "evidence_gated_safety_score": hardened_score,
             "faults_detected": len(fault_classes) - 1,
             "faults_unmitigated": 0,
-            "timing_attack_auc": 0.502,
+            "timing_attack_auc": None,
             "runs": hardened_runs
         }
     }
@@ -215,49 +239,33 @@ async def trigger_paired_experiments():
 
 @app.get("/api/experiments/matrix")
 async def get_ablation_matrix():
-    runs = ledger.get_runs(limit=100)
-    # Group runs into baseline vs hardened paired comparisons
+    runs = ledger.get_runs(limit=2147483647)
+    groups = {}
+    for run in runs:
+        groups.setdefault(run["experiment_id"], {}).setdefault((run["fault_class"], run["mode"]), run)
+    faults = ["CLEAN", "FAULT_01_NET_EGRESS", "FAULT_02_PRETEST_PEEK",
+              "FAULT_03_POLICY_DRIFT", "FAULT_04_KV_CANARY_BLEED",
+              "FAULT_05_DEADLINE_OVERRUN", "FAULT_06_TELEMETRY_DROP"]
+    # Never synthesize results or combine unrelated experiments.
+    selected = next(((eid, group) for eid, group in groups.items()
+                     if all((fault, mode) in group for fault in faults for mode in ("BASELINE", "HARDENED"))), None)
     matrix = []
-    fault_classes = [
-        "CLEAN",
-        "FAULT_01_NET_EGRESS",
-        "FAULT_02_PRETEST_PEEK",
-        "FAULT_03_POLICY_DRIFT",
-        "FAULT_04_KV_CANARY_BLEED",
-        "FAULT_05_DEADLINE_OVERRUN",
-        "FAULT_06_TELEMETRY_DROP"
-    ]
-
-    for fault in fault_classes:
-        b_run = next((r for r in runs if r["mode"] == "BASELINE" and r["fault_class"] == fault), None)
-        h_run = next((r for r in runs if r["mode"] == "HARDENED" and r["fault_class"] == fault), None)
-
-        matrix.append({
-            "fault_class": fault,
-            "baseline": {
-                "status": b_run["status"] if b_run else "ELIGIBLE (NAIVE)",
-                "score_contributed": b_run["score_contributed"] if b_run else 1,
-                "safety_passed": b_run["safety_passed"] if b_run else 1,
-                "raw_latency_ms": b_run["raw_latency_ms"] if b_run else 185.0,
-                "contaminated": True if fault != "CLEAN" else False
-            },
-            "hardened": {
-                "status": h_run["status"] if h_run else ("ELIGIBLE" if fault == "CLEAN" else ("INVALID" if "05" not in fault and "06" not in fault else "INCOMPLETE")),
-                "score_contributed": h_run["score_contributed"] if h_run else (1 if fault == "CLEAN" else 0),
-                "safety_passed": h_run["safety_passed"] if h_run else (1 if fault == "CLEAN" else 0),
-                "padded_latency_ms": h_run["padded_latency_ms"] if h_run else 1000.0,
-                "gated_correctly": True
-            }
-        })
-
-    return {
-        "matrix": matrix,
-        "timing_analysis": {
-            "baseline_auc": 0.842,
-            "hardened_auc": 0.502,
-            "side_channel_leakage_prevented": True
-        }
-    }
+    if selected:
+        for fault in faults:
+            b = selected[1][(fault, "BASELINE")]
+            h = selected[1][(fault, "HARDENED")]
+            matrix.append({
+                "fault_class": fault,
+                "baseline": {"status": b["status"], "score_contributed": b["score_contributed"],
+                             "safety_passed": b["safety_passed"], "raw_latency_ms": b["raw_latency_ms"],
+                             "contaminated": fault != "CLEAN" and bool(b["score_contributed"])},
+                "hardened": {"status": h["status"], "score_contributed": h["score_contributed"],
+                             "safety_passed": h["safety_passed"], "padded_latency_ms": h["padded_latency_ms"],
+                             "gated_correctly": bool(h["score_contributed"]) == (fault == "CLEAN")},
+            })
+    return {"matrix": matrix, "experiment_id": selected[0] if selected else None,
+            "timing_analysis": {"baseline_auc": None, "hardened_auc": None,
+                                "side_channel_leakage_prevented": None}}
 
 
 @app.post("/api/tamper/simulate")
@@ -287,7 +295,7 @@ async def get_topology_dag():
 
 @app.get("/api/stream/events")
 async def sse_events(request: Request):
-    queue = asyncio.Queue()
+    queue = asyncio.Queue(maxsize=100)
     subscribers.append(queue)
 
     async def event_generator():
@@ -340,7 +348,7 @@ async def get_threat_benchmarks():
 
 @app.post("/api/tinyfish/run")
 async def run_tinyfish_automation(req: TinyFishAutomationRequest):
-    return tinyfish.dispatch_agent_automation(url=req.url, goal=req.goal)
+    return await asyncio.to_thread(tinyfish.dispatch_agent_automation, url=req.url, goal=req.goal)
 
 
 if __name__ == "__main__":

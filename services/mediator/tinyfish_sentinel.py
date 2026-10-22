@@ -8,6 +8,7 @@ import os
 import json
 import time
 import hashlib
+import shutil
 import urllib.request
 import urllib.error
 from typing import Dict, Any, List, Optional
@@ -39,12 +40,12 @@ class TinyFishSentinel:
         masked_key = f"{self.api_key[:7]}...{self.api_key[-4:]}" if has_key else "NOT_CONFIGURED"
         
         return {
-            "status": "OPERATIONAL" if has_key else "UNCONFIGURED",
+            "status": "CONFIGURED" if has_key else "UNCONFIGURED",
             "api_key_configured": has_key,
             "masked_key": masked_key,
             "endpoint": self.base_url,
-            "cli_detected": True,
-            "active_harnesses": ["cursor", "claude-code", "opencode", "aegisbay-enclave"],
+            "cli_detected": shutil.which("tinyfish") is not None,
+            "active_harnesses": ["aegisbay-enclave"],
             "capabilities": [
                 "zero_trust_egress_auditing",
                 "canary_token_exfiltration_probe",
@@ -74,10 +75,11 @@ class TinyFishSentinel:
             "canary_token_bound": canary_token[:8] + "..." if len(canary_token) > 8 else canary_token,
             "outbound_egress_allowed": False,
             "interception_subsystem": "iptables_ebtables_seccomp_v2",
-            "enclave_boundary_status": "CONTAINED",
+            "enclave_boundary_status": "SIMULATED_CONTAINMENT",
             "bytes_exfiltrated": 0,
             "external_leak_detected": False,
-            "tinyfish_sentinel_verified": True,
+            "tinyfish_sentinel_verified": False,
+            "mode": "SIMULATION",
             "sha256_probe_digest": hashlib.sha256(json.dumps(probe_payload, sort_keys=True).encode("utf-8")).hexdigest()
         }
         return probe_result
@@ -165,20 +167,11 @@ class TinyFishSentinel:
                     "result": json.loads(res_body),
                     "mode": "LIVE_TINYFISH_API"
                 }
-        except Exception as e:
-            # Deterministic resilient fallback for air-gapped demo
+        except Exception:
+            # An upstream error is not evidence of a successful security check.
             return {
-                "status": "COMPLETED_AIRGAPPED",
-                "result": {
-                    "url": url,
-                    "goal": goal,
-                    "extracted_data": {
-                        "enclave_boundary_verified": True,
-                        "adherence_score": 1.0,
-                        "audit_timestamp": time.time(),
-                        "telemetry_source": "tinyfish_agent_sentinel"
-                    }
-                },
-                "mode": "AIRGAPPED_ENCLAVE_SIMULATION",
-                "upstream_notice": str(e)
+                "status": "FAILED",
+                "result": None,
+                "mode": "LIVE_TINYFISH_API",
+                "error": "TinyFish request failed. Check service connectivity and credentials."
             }

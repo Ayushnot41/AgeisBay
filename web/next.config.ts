@@ -4,6 +4,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  outputFileTracingRoot: __dirname,
   webpack: (config) => {
     config.resolve.symlinks = false;
     config.resolve.alias = {
@@ -20,7 +21,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:8000/api/:path*",
+        destination: `${process.env.MEDIATOR_URL || "http://127.0.0.1:8000"}/api/:path*`,
       },
     ];
   },

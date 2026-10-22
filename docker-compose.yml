@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   mediator:
     build:
@@ -28,9 +26,11 @@ services:
     deploy:
       resources:
         limits:
+          pids: 256
           cpus: "2.0"
           memory: 1024M
     networks:
+      control_net:
       red_net:
         ipv4_address: 172.28.1.2
       blue_net:
@@ -52,6 +52,7 @@ services:
     deploy:
       resources:
         limits:
+          pids: 64
           cpus: "0.5"
           memory: 256M
     networks:
@@ -72,6 +73,7 @@ services:
     deploy:
       resources:
         limits:
+          pids: 64
           cpus: "0.5"
           memory: 256M
     networks:
@@ -92,6 +94,7 @@ services:
     deploy:
       resources:
         limits:
+          pids: 128
           cpus: "1.0"
           memory: 512M
     networks:
@@ -102,16 +105,21 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
+      args:
+        MEDIATOR_URL: http://mediator:8000
     container_name: aegisbay-web
     restart: unless-stopped
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    networks:
+      - control_net
     depends_on:
       - mediator
 
 networks:
+  control_net:
+    driver: bridge
+    internal: true
   red_net:
     driver: bridge
     internal: true

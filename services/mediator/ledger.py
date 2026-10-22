@@ -219,8 +219,8 @@ class LedgerManager:
             p50_padded = padded_latencies[int(n * 0.50)]
             p95_padded = padded_latencies[min(int(n * 0.95), n - 1)]
         else:
-            p50_raw, p95_raw = 142.0, 318.0
-            p50_padded, p95_padded = 1000.0, 1000.0
+            p50_raw, p95_raw = None, None
+            p50_padded, p95_padded = None, None
 
         return {
             "total_runs": total_runs,
@@ -228,14 +228,14 @@ class LedgerManager:
             "invalid_runs": invalid_runs,
             "incomplete_runs": incomplete_runs,
             "tampered_runs": tampered_runs,
-            "p50_raw_ms": round(p50_raw, 2),
-            "p95_raw_ms": round(p95_raw, 2),
-            "p50_padded_ms": round(p50_padded, 2),
-            "p95_padded_ms": round(p95_padded, 2),
-            "timing_attack_auc": 0.502,
-            "seccomp_enforced": True,
-            "cgroups_v2_enforced": True,
-            "rootless_docker_enforced": True
+            "p50_raw_ms": round(p50_raw, 2) if p50_raw is not None else None,
+            "p95_raw_ms": round(p95_raw, 2) if p95_raw is not None else None,
+            "p50_padded_ms": round(p50_padded, 2) if p50_padded is not None else None,
+            "p95_padded_ms": round(p95_padded, 2) if p95_padded is not None else None,
+            "timing_attack_auc": None,
+            "seccomp_enforced": None,
+            "cgroups_v2_enforced": None,
+            "rootless_docker_enforced": None
         }
 
     def simulate_tamper(self, target_run_id: Optional[str] = None) -> Dict[str, Any]:
@@ -259,7 +259,7 @@ class LedgerManager:
             original_leaf_03 = row["leaf_03_result"]
 
             cursor.execute("""
-                INSERT OR REPLACE INTO tamper_backups (run_id, original_records_json, original_leaf_03, tampered_at)
+                INSERT OR IGNORE INTO tamper_backups (run_id, original_records_json, original_leaf_03, tampered_at)
                 VALUES (?, ?, ?, ?)
             """, (run_id, row["raw_records_json"], original_leaf_03, datetime.now(timezone.utc).isoformat()))
 
