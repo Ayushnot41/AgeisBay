@@ -29,13 +29,9 @@
 
 <br/>
 
-<!-- High-Resolution Visual Architecture Banner (100% Guaranteed Render Across All GitHub Clients) -->
+<!-- High-Resolution 3D Visual Architecture Motion Graphic (Natively Animated in GitHub) -->
 <p align="center">
-  <a href="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/aegisbay_3d_motion.svg">
-    <img src="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/aegisbay_3d_motion.png" alt="AegisBay 3D Architecture Banner" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
-  </a>
-  <br/>
-  <sub><i>Click image above to open the full interactive animated SVG vector graphic.</i></sub>
+  <img src="docs/assets/aegisbay_3d_motion.gif" alt="AegisBay 3D Architecture Motion Graphic" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
 </p>
 
 </div>
@@ -79,9 +75,7 @@ AegisBay is a **tamper-proof, zero-trust digital exam vault**:
 ## Color-Coded Enclave Architecture
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_architecture.svg">
-    <img src="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_architecture.png" alt="AegisBay Color Block Architecture" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
-  </a>
+  <img src="docs/assets/color_block_architecture.png" alt="AegisBay Color Block Architecture" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
 </p>
 
 ### Enclave Subnet Isolation Rules:
@@ -112,9 +106,7 @@ AegisBay is a **tamper-proof, zero-trust digital exam vault**:
 ## 4-Leaf Merkle Tree & Cryptographic Specifications
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_merkle.svg">
-    <img src="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_merkle.png" alt="AegisBay 4-Leaf Merkle Tree" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
-  </a>
+  <img src="docs/assets/color_block_merkle.png" alt="AegisBay 4-Leaf Merkle Tree" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
 </p>
 
 Every run committed to the SQLite ledger generates a deterministic 4-leaf Merkle Tree formatted in strict RFC 8785 canonical JSON:
@@ -135,9 +127,7 @@ $$\text{Signature} = \text{Base64}(\text{Ed25519\_Sign}(\text{PrivateKey}_{\text
 ## Evidence-Gated State Machine & The 6 Controlled Faults
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_statemachine.svg">
-    <img src="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_statemachine.png" alt="AegisBay Evidence-Gated State Machine" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
-  </a>
+  <img src="docs/assets/color_block_statemachine.png" alt="AegisBay Evidence-Gated State Machine" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
 </p>
 
 | Fault Identifier | Real-World Attack Scenario | Kernel Interception Mechanism | Enclave Status | Score Contributed |

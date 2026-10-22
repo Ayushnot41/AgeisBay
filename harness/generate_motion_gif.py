@@ -1,0 +1,183 @@
+import os
+import math
+import subprocess
+import tempfile
+from PIL import Image
+
+def generate_svg_frame(k, total_frames):
+    t = k / total_frames
+    angle1 = t * 360.0
+    angle2 = -t * 360.0
+    hover_y = -8.0 * math.sin(2 * math.pi * t)
+    pulse_w = 2.0 + 0.8 * math.sin(2 * math.pi * t)
+    flow_offset = (1.0 - t) * 40.0
+
+    svg_content = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 320" width="1000" height="320" style="background:#07090E;">
+  <defs>
+    <linearGradient id="cyberCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.4"/>
+    </linearGradient>
+    <linearGradient id="emeraldPass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#059669" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="redAdversary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#991B1B" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="purpleToken" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A855F7" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#6B21A8" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- 3D Perspective Grid Background -->
+  <g stroke="#111827" stroke-width="1" opacity="0.75">
+    <line x1="0" y1="50" x2="1000" y2="50"/>
+    <line x1="0" y1="100" x2="1000" y2="100"/>
+    <line x1="0" y1="160" x2="1000" y2="160"/>
+    <line x1="0" y1="220" x2="1000" y2="220"/>
+    <line x1="0" y1="270" x2="1000" y2="270"/>
+    <line x1="100" y1="0" x2="100" y2="320"/>
+    <line x1="250" y1="0" x2="250" y2="320"/>
+    <line x1="400" y1="0" x2="400" y2="320"/>
+    <line x1="600" y1="0" x2="600" y2="320"/>
+    <line x1="750" y1="0" x2="750" y2="320"/>
+    <line x1="900" y1="0" x2="900" y2="320"/>
+  </g>
+
+  <!-- Outer Orbiting Ring 1 (Cyan) -->
+  <g transform="rotate({angle1:.2f}, 500, 160)">
+    <ellipse cx="500" cy="160" rx="200" ry="85" fill="none" stroke="url(#cyberCyan)" stroke-width="1.8" stroke-dasharray="8 8" opacity="0.85"/>
+    <circle cx="700" cy="160" r="5" fill="#38BDF8" filter="url(#neonGlow)"/>
+    <circle cx="300" cy="160" r="5" fill="#06B6D4" filter="url(#neonGlow)"/>
+  </g>
+
+  <!-- Outer Orbiting Ring 2 (Emerald) -->
+  <g transform="rotate({angle2:.2f}, 500, 160)">
+    <ellipse cx="500" cy="160" rx="170" ry="110" fill="none" stroke="url(#emeraldPass)" stroke-width="1.5" stroke-dasharray="12 6" opacity="0.75"/>
+    <circle cx="500" cy="50" r="4.5" fill="#10B981" filter="url(#neonGlow)"/>
+    <circle cx="500" cy="270" r="4.5" fill="#059669" filter="url(#neonGlow)"/>
+  </g>
+
+  <!-- Left Entity: Red Workspace Subnet -->
+  <g transform="translate(60, 95)">
+    <polygon points="60,0 120,30 120,95 60,125 0,95 0,30" fill="#0C1017" stroke="#EF4444" stroke-width="1.8"/>
+    <polygon points="60,0 120,30 60,60 0,30" fill="#181216" stroke="#EF4444" stroke-width="1"/>
+    <polygon points="60,60 120,30 120,95 60,125" fill="#0C1017" stroke="#EF4444" stroke-width="0.8" opacity="0.6"/>
+    <circle cx="60" cy="30" r="5" fill="#EF4444" filter="url(#neonGlow)"/>
+    <text x="60" y="78" font-family="monospace" font-size="11" fill="#F8FAFC" text-anchor="middle" font-weight="700">RED WORKSPACE</text>
+    <text x="60" y="93" font-family="monospace" font-size="9" fill="#EF4444" text-anchor="middle">172.28.1.0/24</text>
+    <text x="60" y="107" font-family="monospace" font-size="8" fill="#94A3B8" text-anchor="middle">OWASP / JailbreakBench</text>
+  </g>
+
+  <!-- Flow Vector: Red Subnet to Enclave -->
+  <path d="M 185 160 L 370 160" stroke="#06B6D4" stroke-width="2.5" stroke-dasharray="8 6" stroke-dashoffset="{flow_offset:.1f}" opacity="0.9"/>
+  <polygon points="370,160 358,154 358,166" fill="#06B6D4"/>
+  <rect x="230" y="142" width="105" height="18" rx="4" fill="#090D14" stroke="#06B6D4" stroke-width="0.8"/>
+  <text x="282" y="155" font-family="monospace" font-size="8.5" fill="#38BDF8" text-anchor="middle">AES-256-GCM + AAD</text>
+
+  <!-- Central Entity: 3D Zero-Trust Mediator Enclave (Floating 3D Isometric Vault) -->
+  <g transform="translate(0, {hover_y:.2f})">
+    <g transform="translate(390, 65)">
+      <polygon points="110,0 220,55 220,160 110,215 0,160 0,55" fill="#090E17" stroke="#38BDF8" stroke-width="{pulse_w:.2f}"/>
+      <polygon points="110,0 220,55 110,110 0,55" fill="#0F172A" stroke="#38BDF8" stroke-width="1.2"/>
+      <polygon points="0,55 110,110 110,215 0,160" fill="#090E17" stroke="#0284C7" stroke-width="1"/>
+      <polygon points="110,110 220,55 220,160 110,215" fill="#0A1220" stroke="#0284C7" stroke-width="1"/>
+
+      <!-- Inner Vault Core -->
+      <rect x="40" y="70" width="140" height="85" rx="6" fill="#0B1320" stroke="#10B981" stroke-width="1.4" opacity="0.95"/>
+      <text x="110" y="88" font-family="monospace" font-size="10" fill="#38BDF8" text-anchor="middle" font-weight="700">TRUSTED MEDIATOR</text>
+      <text x="110" y="103" font-family="monospace" font-size="8.5" fill="#10B981" text-anchor="middle">VOLATILE RAM SEAL</text>
+      <text x="110" y="118" font-family="monospace" font-size="8" fill="#F8FAFC" text-anchor="middle">1000.0ms Constant-Time</text>
+      <text x="110" y="132" font-family="monospace" font-size="8" fill="#F59E0B" text-anchor="middle">TinyFish Sentinel Egress = 0</text>
+      <circle cx="55" cy="85" r="3.5" fill="#10B981"/>
+      <circle cx="165" cy="85" r="3.5" fill="#38BDF8"/>
+    </g>
+  </g>
+
+  <!-- Flow Vector: Blue Subnet to Enclave -->
+  <path d="M 815 160 L 630 160" stroke="#3B82F6" stroke-width="2.5" stroke-dasharray="8 6" stroke-dashoffset="{-flow_offset:.1f}" opacity="0.9"/>
+  <polygon points="630,160 642,154 642,166" fill="#3B82F6"/>
+  <rect x="680" y="142" width="95" height="18" rx="4" fill="#090D14" stroke="#3B82F6" stroke-width="0.8"/>
+  <text x="727" y="155" font-family="monospace" font-size="8.5" fill="#60A5FA" text-anchor="middle">Policy Freeze H(P)</text>
+
+  <!-- Right Entity: Blue Workspace Subnet -->
+  <g transform="translate(820, 95)">
+    <polygon points="60,0 120,30 120,95 60,125 0,95 0,30" fill="#0C1017" stroke="#3B82F6" stroke-width="1.8"/>
+    <polygon points="60,0 120,30 60,60 0,30" fill="#111B2E" stroke="#3B82F6" stroke-width="1"/>
+    <polygon points="60,60 120,30 120,95 60,125" fill="#0C1017" stroke="#3B82F6" stroke-width="0.8" opacity="0.6"/>
+    <circle cx="60" cy="30" r="5" fill="#3B82F6" filter="url(#neonGlow)"/>
+    <text x="60" y="78" font-family="monospace" font-size="11" fill="#F8FAFC" text-anchor="middle" font-weight="700">BLUE WORKSPACE</text>
+    <text x="60" y="93" font-family="monospace" font-size="9" fill="#3B82F6" text-anchor="middle">172.28.2.0/24</text>
+    <text x="60" y="107" font-family="monospace" font-size="8" fill="#94A3B8" text-anchor="middle">Target Defense Model</text>
+  </g>
+
+  <!-- Bottom Proof Node: Merkle Certification -->
+  <g transform="translate(300, 265)">
+    <rect x="0" y="0" width="400" height="42" rx="6" fill="#0C121E" stroke="#10B981" stroke-width="1.5"/>
+    <circle cx="20" cy="21" r="5" fill="#10B981" filter="url(#neonGlow)"/>
+    <text x="35" y="18" font-family="monospace" font-size="9.5" fill="#F8FAFC" font-weight="700">4-LEAF MERKLE ROOT</text>
+    <text x="35" y="32" font-family="monospace" font-size="8" fill="#10B981">RFC 8785 Canonical JSON  *  Ed25519 Certified  *  1-Bit Tamper Proof</text>
+    <rect x="315" y="10" width="75" height="22" rx="4" fill="#042F2E" stroke="#10B981" stroke-width="1"/>
+    <text x="352" y="24" font-family="monospace" font-size="8.5" fill="#34D399" text-anchor="middle" font-weight="700">VERIFIED</text>
+  </g>
+</svg>'''
+    return svg_content
+
+def main():
+    chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+    total_frames = 24
+    temp_dir = tempfile.mkdtemp(prefix="aegisbay_anim_")
+    print(f"[+] Generating {total_frames} frames in {temp_dir}...")
+
+    frame_images = []
+    for k in range(total_frames):
+        svg = generate_svg_frame(k, total_frames)
+        svg_path = os.path.join(temp_dir, f"frame_{k:02d}.svg")
+        png_path = os.path.join(temp_dir, f"frame_{k:02d}.png")
+        html_path = os.path.join(temp_dir, f"frame_{k:02d}.html")
+
+        # HTML wrapper with 0 margin
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write(f'''<!DOCTYPE html><html><head><style>body,html{{margin:0;padding:0;background:#07090E;overflow:hidden;}}</style></head><body>{svg}</body></html>''')
+
+        # Render screenshot
+        cmd = [
+            chrome_path,
+            "--headless=new",
+            "--disable-gpu",
+            "--hide-scrollbars",
+            f"--window-size=1000,320",
+            f"--screenshot={png_path}",
+            f"file:///{html_path.replace(os.sep, '/')}"
+        ]
+        subprocess.run(cmd, check=True, capture_output=True)
+
+        img = Image.open(png_path).convert("RGBA")
+        frame_images.append(img.crop((0, 0, 1000, 320)))
+        print(f"  Frame {k+1}/{total_frames} rendered.")
+
+    # Save animated GIF
+    out_gif = os.path.join("docs", "assets", "aegisbay_3d_motion.gif")
+    os.makedirs(os.path.dirname(out_gif), exist_ok=True)
+    
+    # Optimize palette for clean neon lines on dark background
+    frame_images[0].save(
+        out_gif,
+        save_all=True,
+        append_images=frame_images[1:],
+        duration=65,  # ~15 fps
+        loop=0,
+        optimize=True
+    )
+    print(f"[+] Successfully saved animated GIF: {out_gif} ({os.path.getsize(out_gif)} bytes)")
+
+if __name__ == "__main__":
+    main()
