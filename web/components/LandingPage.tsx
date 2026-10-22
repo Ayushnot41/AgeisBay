@@ -27,10 +27,16 @@ import {
   ChevronRight,
   Play,
   RotateCw,
+  Trophy,
+  Zap,
+  ShieldAlert,
+  Award,
 } from "lucide-react";
 import {
   TelemetryStats,
   dispatchRun,
+  getSealLeaderboard,
+  ModelLeaderboardEntry,
   API_BASE,
 } from "@/lib/api";
 
@@ -38,6 +44,9 @@ interface LandingPageProps {
   onLaunchConsole: () => void;
   onOpenLedger: () => void;
   onOpenAblation: () => void;
+  onOpenLeaderboard?: () => void;
+  onOpenRedTeam?: () => void;
+  onOpenGuard?: () => void;
   stats: TelemetryStats | null;
 }
 
@@ -45,11 +54,14 @@ export default function LandingPage({
   onLaunchConsole,
   onOpenLedger,
   onOpenAblation,
+  onOpenLeaderboard,
+  onOpenRedTeam,
+  onOpenGuard,
   stats,
 }: LandingPageProps) {
   const { user, isAuthenticated, logout, loginDemo } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [leaderboardPreview, setLeaderboardPreview] = useState<ModelLeaderboardEntry[]>([]);
 
   // Interactive Live Sandbox state on Landing Page
   const [sandboxPrompt, setSandboxPrompt] = useState(
@@ -58,6 +70,12 @@ export default function LandingPage({
   const [sandboxFault, setSandboxFault] = useState("CLEAN");
   const [sandboxLoading, setSandboxLoading] = useState(false);
   const [sandboxResult, setSandboxResult] = useState<any | null>(null);
+
+  useEffect(() => {
+    getSealLeaderboard()
+      .then((data) => setLeaderboardPreview(data.slice(0, 4)))
+      .catch(() => {});
+  }, []);
 
   const handleSandboxDispatch = async () => {
     setSandboxLoading(true);
@@ -116,15 +134,36 @@ export default function LandingPage({
           </div>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-slate-300">
+          <nav className="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-300">
+            {onOpenLeaderboard && (
+              <button
+                onClick={onOpenLeaderboard}
+                className="flex items-center gap-1.5 hover:text-status-cyan transition-colors"
+              >
+                <Trophy className="h-3.5 w-3.5 text-amber-400" />
+                <span>SEAL Leaderboard</span>
+              </button>
+            )}
+            {onOpenRedTeam && (
+              <button
+                onClick={onOpenRedTeam}
+                className="flex items-center gap-1.5 hover:text-status-cyan transition-colors"
+              >
+                <Zap className="h-3.5 w-3.5 text-purple-400" />
+                <span>Red Team</span>
+              </button>
+            )}
+            {onOpenGuard && (
+              <button
+                onClick={onOpenGuard}
+                className="flex items-center gap-1.5 hover:text-status-cyan transition-colors"
+              >
+                <ShieldAlert className="h-3.5 w-3.5 text-blue-400" />
+                <span>Lakera Shield</span>
+              </button>
+            )}
             <a href="#features" className="hover:text-status-cyan transition-colors">
               Pillars
-            </a>
-            <a href="#architecture" className="hover:text-status-cyan transition-colors">
-              Architecture
-            </a>
-            <a href="#sandbox" className="hover:text-status-cyan transition-colors">
-              Live Sandbox
             </a>
             <button
               onClick={onOpenLedger}
@@ -136,7 +175,7 @@ export default function LandingPage({
               onClick={onOpenAblation}
               className="hover:text-status-cyan transition-colors"
             >
-              Ablation Benchmark
+              Ablation
             </button>
             <a href="#faq" className="hover:text-status-cyan transition-colors">
               FAQ
@@ -213,20 +252,30 @@ export default function LandingPage({
         {mobileMenuOpen && (
           <div className="md:hidden border-b border-hairline bg-panel p-4 space-y-3 animate-in slide-in-from-top-2 duration-150">
             <div className="grid grid-cols-2 gap-2 text-xs font-medium">
-              <a
-                href="#features"
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-lg bg-card p-2 text-center text-slate-200"
-              >
-                Pillars
-              </a>
-              <a
-                href="#architecture"
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-lg bg-card p-2 text-center text-slate-200"
-              >
-                Architecture
-              </a>
+              {onOpenLeaderboard && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenLeaderboard();
+                  }}
+                  className="rounded-lg bg-card p-2 text-center text-amber-400 flex items-center justify-center gap-1.5"
+                >
+                  <Trophy className="h-3.5 w-3.5" />
+                  <span>SEAL Board</span>
+                </button>
+              )}
+              {onOpenRedTeam && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenRedTeam();
+                  }}
+                  className="rounded-lg bg-card p-2 text-center text-purple-400 flex items-center justify-center gap-1.5"
+                >
+                  <Zap className="h-3.5 w-3.5" />
+                  <span>Red Team</span>
+                </button>
+              )}
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -248,27 +297,6 @@ export default function LandingPage({
             </div>
 
             <div className="pt-2 border-t border-hairline flex flex-col gap-2">
-              {isAuthenticated && user ? (
-                <div className="flex items-center justify-between p-2 rounded-lg bg-card text-xs">
-                  <div className="flex items-center gap-2">
-                    <UserIcon className="h-4 w-4 text-status-cyan" />
-                    <span>{user.name}</span>
-                  </div>
-                  <button onClick={logout} className="text-red-400 text-[11px]">
-                    Sign Out
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => {
-                    loginDemo("Lead Auditor");
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full rounded-xl border border-hairline-light bg-card py-2 text-xs font-medium text-slate-200 text-center"
-                >
-                  Sign In (Auditor Persona)
-                </button>
-              )}
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -295,7 +323,7 @@ export default function LandingPage({
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-cyan opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-status-cyan"></span>
                 </span>
-                <span>ZERO-TRUST ENCLAVE • ED25519 ATTESTED</span>
+                <span>ZERO-TRUST ENCLAVE • SCALE AI SEAL ATTENTION</span>
               </div>
 
               {/* Main Headline */}
@@ -322,31 +350,35 @@ export default function LandingPage({
                   <span>Launch Operator Console</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
-                <a
-                  href="#sandbox"
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-hairline-light bg-panel px-6 py-3.5 text-sm font-semibold text-slate-200 hover:bg-card-elevated hover:border-slate-400 transition-all"
-                >
-                  <span>Try Live Sandbox</span>
-                  <Play className="h-3.5 w-3.5 text-status-cyan" />
-                </a>
-                <button
-                  onClick={onOpenLedger}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-hairline bg-card px-5 py-3.5 text-sm font-medium text-slate-300 hover:text-slate-100 transition-colors"
-                >
-                  <Database className="h-4 w-4 text-emerald-400" />
-                  <span>Inspect Ledger</span>
-                </button>
+                {onOpenLeaderboard && (
+                  <button
+                    onClick={onOpenLeaderboard}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-5 py-3.5 text-sm font-semibold text-amber-300 hover:bg-amber-500/20 transition-all"
+                  >
+                    <Trophy className="h-4 w-4 text-amber-400" />
+                    <span>View SEAL Leaderboard</span>
+                  </button>
+                )}
+                {onOpenRedTeam && (
+                  <button
+                    onClick={onOpenRedTeam}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-hairline bg-card px-5 py-3.5 text-sm font-medium text-purple-300 hover:text-purple-200 transition-colors"
+                  >
+                    <Zap className="h-4 w-4 text-purple-400" />
+                    <span>Red Team Engine</span>
+                  </button>
+                )}
               </div>
 
               {/* Proof Badges */}
               <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-mono text-slate-400 border-t border-hairline/60">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-status-pass" />
-                  <span>Hardware Blinding (Seccomp/v2)</span>
+                  <span>Anthropic Constitutional Axioms</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-status-pass" />
-                  <span>Timing Padding (AUC 0.50)</span>
+                  <span>Lakera Guard Threat Radar</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-status-pass" />
@@ -374,7 +406,6 @@ export default function LandingPage({
                     alt="AegisBay 3D Architecture Motion Graphic"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      // Fallback SVG graphic if asset unavailable
                       (e.target as any).style.display = "none";
                     }}
                   />
@@ -408,7 +439,88 @@ export default function LandingPage({
         </div>
       </section>
 
-      {/* 3. LIVE ENCLAVE METRICS RIBBON */}
+      {/* 3. SCALE AI SEAL FRONTIER MODEL LEADERBOARD PREVIEW SECTION */}
+      {leaderboardPreview.length > 0 && (
+        <section id="leaderboard" className="py-16 border-b border-hairline/60 bg-panel/30">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+              <div>
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-xs font-mono text-amber-300 mb-2">
+                  <Trophy className="h-3.5 w-3.5" />
+                  <span>SCALE AI SEAL EVALUATION MATRIX</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-slate-100">
+                  Frontier AI Model Safety Rankings
+                </h3>
+                <p className="mt-2 text-xs sm:text-sm text-slate-400 max-w-xl">
+                  Cryptographically verified safety ratings across leading foundation models.
+                  Tested under double-blinded zero-trust isolation against adversarial jailbreaks.
+                </p>
+              </div>
+
+              {onOpenLeaderboard && (
+                <button
+                  onClick={onOpenLeaderboard}
+                  className="flex items-center gap-2 rounded-xl bg-amber-500/20 border border-amber-500/50 px-4 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-500/30 transition-all shadow-sm"
+                >
+                  <span>Inspect Full SEAL Leaderboard</span>
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {leaderboardPreview.map((model) => (
+                <div
+                  key={model.model_id}
+                  onClick={onOpenLeaderboard}
+                  className="rounded-2xl border border-hairline bg-card p-5 cursor-pointer hover:border-amber-500/50 hover:bg-card-elevated transition-all group"
+                >
+                  <div className="flex items-center justify-between text-xs font-mono mb-3">
+                    <div className="flex items-center gap-1 font-bold text-amber-400">
+                      <Award className="h-3.5 w-3.5" />
+                      <span>#{model.rank}</span>
+                    </div>
+                    <span className="rounded-full bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 text-[9px] font-bold text-status-cyan">
+                      {model.tier}
+                    </span>
+                  </div>
+
+                  <h4 className="text-sm font-bold text-slate-100 group-hover:text-status-cyan transition-colors">
+                    {model.name}
+                  </h4>
+                  <div className="text-[11px] text-slate-400 font-mono mb-4">
+                    {model.vendor}
+                  </div>
+
+                  <div className="space-y-2 border-t border-hairline/60 pt-3 text-xs font-mono">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Safety Score:</span>
+                      <span className="font-bold text-emerald-400">
+                        {model.overall_safety_rating.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Jailbreak Imm.:</span>
+                      <span className="text-slate-200">
+                        {model.jailbreak_resistance.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Timing AUC:</span>
+                      <span className="text-status-cyan">
+                        {model.side_channel_timing_auc.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 4. LIVE ENCLAVE METRICS RIBBON */}
       <section className="border-b border-hairline/80 bg-panel/80 py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -454,120 +566,6 @@ export default function LandingPage({
                 {stats?.enclave_public_key_fingerprint || "ED25519:8E:82:E7:93"}
               </div>
               <p className="mt-1 text-[11px] text-slate-400">Hardware root of trust</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. THE PROBLEM VS THE AEGISBAY SOLUTION */}
-      <section className="py-20 border-b border-hairline/60">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-xs font-mono uppercase tracking-widest text-status-cyan mb-2">
-              Comparative Vulnerability Analysis
-            </h2>
-            <h3 className="text-2xl sm:text-4xl font-bold text-slate-100">
-              Why Traditional AI Safety Testing Fails
-            </h3>
-            <p className="mt-3 text-sm sm:text-base text-slate-400">
-              Traditional benchmark frameworks trust evaluators and models implicitly. AegisBay
-              introduces blinded, evidence-gated enclaves where truth is mathematically verified.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Vulnerable Traditional Infrastructure */}
-            <div className="rounded-2xl border border-status-fail/30 bg-status-fail/5 p-6 sm:p-8 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-status-fail/20 text-status-fail">
-                  <AlertTriangle className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-bold text-red-200">
-                    Conventional Benchmarks (Vulnerable)
-                  </h4>
-                  <p className="text-xs text-red-400/80">Unauthenticated, mutable execution</p>
-                </div>
-              </div>
-
-              <ul className="space-y-3 pt-3 text-xs sm:text-sm text-slate-300">
-                <li className="flex items-start gap-2.5">
-                  <span className="text-status-fail font-bold">x</span>
-                  <span>
-                    <strong>Model Peeking & Prompt Canary Bleed:</strong> Hostile models probe
-                    system prompts and extract evaluation policies prior to scoring.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-status-fail font-bold">x</span>
-                  <span>
-                    <strong>Post-Hoc Result Tampering:</strong> Benchmark organizers can quietly
-                    alter safety scores or discard unfavorable evaluations in mutable databases.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-status-fail font-bold">x</span>
-                  <span>
-                    <strong>Side-Channel Timing Leaks:</strong> Response latency reveals internal
-                    guardrail activations and policy tokens to adversarial probes.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="text-status-fail font-bold">x</span>
-                  <span>
-                    <strong>Evaluator Collusion:</strong> Without blinded commit-reveal, model
-                    evaluators can collude with vendors to pass safety benchmarks.
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            {/* AegisBay Hardened Enclave */}
-            <div className="rounded-2xl border border-status-pass/30 bg-status-pass/5 p-6 sm:p-8 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-status-pass/20 text-status-pass">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-bold text-emerald-200">
-                    AegisBay Zero-Trust Enclave (Hardened)
-                  </h4>
-                  <p className="text-xs text-emerald-400/80">
-                    Cryptographically sealed & attested
-                  </p>
-                </div>
-              </div>
-
-              <ul className="space-y-3 pt-3 text-xs sm:text-sm text-slate-300">
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-status-pass mt-0.5" />
-                  <span>
-                    <strong>Hardware Isolation & Seccomp:</strong> Double-blinded container
-                    sandbox with strict egress blocking, ephemeral memory, and canary sinks.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-status-pass mt-0.5" />
-                  <span>
-                    <strong>Four-Leaf Merkle Tree Audit:</strong> Every prompt, check, result, and
-                    status forms a SHA-256 Merkle leaf signed by an Ed25519 notary key.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-status-pass mt-0.5" />
-                  <span>
-                    <strong>Uniform Timing Quantization:</strong> All responses padded to uniform
-                    distribution, achieving zero side-channel leakage (AUC 0.50).
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-status-pass mt-0.5" />
-                  <span>
-                    <strong>Cryptographic Commit-Reveal:</strong> Evaluator commitments locked
-                    before prompt execution, completely preventing collusion or benchmark gaming.
-                  </span>
-                </li>
-              </ul>
             </div>
           </div>
         </div>
@@ -920,6 +918,15 @@ export default function LandingPage({
               <span>Open SecOps Workbench</span>
               <ArrowRight className="h-4 w-4" />
             </button>
+            {onOpenLeaderboard && (
+              <button
+                onClick={onOpenLeaderboard}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-8 py-3.5 text-sm font-semibold text-amber-300 hover:bg-amber-500/20 transition-all"
+              >
+                <Trophy className="h-4 w-4 text-amber-400" />
+                <span>SEAL Leaderboard</span>
+              </button>
+            )}
             <button
               onClick={onOpenLedger}
               className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-hairline-light bg-card px-8 py-3.5 text-sm font-semibold text-slate-200 hover:bg-card-elevated transition-all"

@@ -21,6 +21,9 @@ import MerkleTreeVisualizer from "@/components/MerkleTreeVisualizer";
 import TopologyDagModal from "@/components/TopologyDagModal";
 import TinyFishSentinelCard from "@/components/TinyFishSentinelCard";
 import EvidenceLedgerView from "@/components/EvidenceLedgerView";
+import SealLeaderboard from "@/components/SealLeaderboard";
+import ConstitutionalRedTeam from "@/components/ConstitutionalRedTeam";
+import LakeraGuardShield from "@/components/LakeraGuardShield";
 import LandingPage from "@/components/LandingPage";
 import AuthModal from "@/components/AuthModal";
 import { ErrorNotice, CopyButton } from "@/components/WorkbenchUI";
@@ -36,10 +39,22 @@ import {
   LogOut,
   ShieldCheck,
   Lock,
+  Trophy,
+  Zap,
+  ShieldAlert,
 } from "lucide-react";
 import "./workbench.css";
 
-type TabId = "console" | "ledger" | "sentinel" | "ablation" | "topology";
+type TabId =
+  | "console"
+  | "leaderboard"
+  | "redteam"
+  | "guard"
+  | "ledger"
+  | "sentinel"
+  | "ablation"
+  | "topology";
+
 type ViewMode = "landing" | "workbench";
 
 export default function SecOpsWorkbench() {
@@ -133,6 +148,9 @@ export default function SecOpsWorkbench() {
 
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: "console", label: "Operations Console", icon: <LayoutDashboard size={14} /> },
+    { id: "leaderboard", label: "SEAL Leaderboard", icon: <Trophy size={14} /> },
+    { id: "redteam", label: "Constitutional Red Team", icon: <Zap size={14} /> },
+    { id: "guard", label: "Lakera Guard Shield", icon: <ShieldAlert size={14} /> },
     { id: "ledger", label: "Evidence Ledger", icon: <Database size={14} /> },
     { id: "sentinel", label: "Sentinel Defense", icon: <Radio size={14} /> },
     { id: "ablation", label: "Paired Ablation Lab", icon: <FlaskConical size={14} /> },
@@ -153,6 +171,18 @@ export default function SecOpsWorkbench() {
           onOpenAblation={() => {
             setView("workbench");
             setActiveTab("ablation");
+          }}
+          onOpenLeaderboard={() => {
+            setView("workbench");
+            setActiveTab("leaderboard");
+          }}
+          onOpenRedTeam={() => {
+            setView("workbench");
+            setActiveTab("redteam");
+          }}
+          onOpenGuard={() => {
+            setView("workbench");
+            setActiveTab("guard");
           }}
         />
         <AuthModal
@@ -315,7 +345,7 @@ export default function SecOpsWorkbench() {
             </div>
           </div>
 
-          {/* Tab 1: Operations Console (Unified Dashboard) */}
+          {/* Tab 1: Operations Console */}
           {activeTab === "console" && (
             <>
               <CommitRevealDispatcher
@@ -340,7 +370,28 @@ export default function SecOpsWorkbench() {
             </>
           )}
 
-          {/* Tab 2: Evidence Ledger */}
+          {/* Tab 2: Frontier Model SEAL Leaderboard */}
+          {activeTab === "leaderboard" && (
+            <div className="workspace-column">
+              <SealLeaderboard />
+            </div>
+          )}
+
+          {/* Tab 3: Constitutional Red Team */}
+          {activeTab === "redteam" && (
+            <div className="workspace-column">
+              <ConstitutionalRedTeam onRunDispatched={loadData} />
+            </div>
+          )}
+
+          {/* Tab 4: Lakera Threat Shield */}
+          {activeTab === "guard" && (
+            <div className="workspace-column">
+              <LakeraGuardShield onRunDispatched={loadData} />
+            </div>
+          )}
+
+          {/* Tab 5: Evidence Ledger */}
           {activeTab === "ledger" && (
             <EvidenceLedgerView
               runs={runs}
@@ -350,7 +401,7 @@ export default function SecOpsWorkbench() {
             />
           )}
 
-          {/* Tab 3: Sentinel Defense */}
+          {/* Tab 6: Sentinel Defense */}
           {activeTab === "sentinel" && (
             <div className="workspace-column">
               <TinyFishSentinelCard onLoadThreatIntoDispatcher={loadThreat} />
@@ -362,14 +413,14 @@ export default function SecOpsWorkbench() {
             </div>
           )}
 
-          {/* Tab 4: Paired Ablation Lab */}
+          {/* Tab 7: Paired Ablation Lab */}
           {activeTab === "ablation" && (
             <div className="workspace-column">
               <PairedMatrixComparator matrix={matrix} onTriggerComplete={loadData} />
             </div>
           )}
 
-          {/* Tab 5: Subnet Topology */}
+          {/* Tab 8: Subnet Topology */}
           {activeTab === "topology" && (
             <div className="workspace-column">
               <EnclaveTopology

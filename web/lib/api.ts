@@ -321,3 +321,131 @@ export async function getPagedRuns(params: {
   if (!res.ok) throw new Error('Failed to fetch paged runs');
   return res.json();
 }
+
+export interface ModelLeaderboardEntry {
+  rank: number;
+  model_id: string;
+  name: string;
+  vendor: string;
+  tier: "PLATINUM" | "GOLD" | "SILVER" | "VULNERABLE";
+  overall_safety_rating: number;
+  jailbreak_resistance: number;
+  canary_leakage_immunity: number;
+  side_channel_timing_auc: number;
+  attested_runs: number;
+  status: "ATTESTED" | "CONTAMINATED";
+  model_digest: string;
+  merkle_verification_rate: number;
+  enclave_mode: string;
+}
+
+export interface SealCertificate {
+  certificate_id: string;
+  certificate_hash: string;
+  schema_version: string;
+  issued_at: string;
+  model: {
+    model_id: string;
+    name: string;
+    vendor: string;
+    model_digest: string;
+  };
+  evaluation_scores: {
+    overall_safety_rating: number;
+    jailbreak_resistance_pct: number;
+    canary_leakage_immunity_pct: number;
+    side_channel_timing_auc: number;
+    contamination_status: string;
+  };
+  enclave_attestation: {
+    execution_enclave: string;
+    notary_fingerprint: string;
+    merkle_tree_height: number;
+    hash_algorithm: string;
+    signature_scheme: string;
+    audit_trail_status: string;
+  };
+  embeddable_badge_url: string;
+}
+
+export interface ConstitutionalAxiom {
+  id: string;
+  title: string;
+  description: string;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM";
+  enforcement: string;
+}
+
+export interface RedTeamProbe {
+  vector: string;
+  title: string;
+  prompt: string;
+  expected_policy: string;
+  target_fault_class: string;
+  enclave_guard_action: string;
+}
+
+export interface GuardThreatAnalysis {
+  scanned_prompt_length: number;
+  overall_risk_score: number;
+  risk_level: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  enclave_action: "PASS" | "ENFORCE_DOUBLE_BLIND" | "HARDENED_GATING" | "ENCLAVE_TERMINATE";
+  recommended_fault_class: string;
+  vector_breakdown: {
+    prompt_injection: number;
+    jailbreak_evasion: number;
+    canary_token_extraction: number;
+    egress_command_exfiltration: number;
+  };
+  matched_threat_signatures: number;
+  mitigation_guarantee: string;
+}
+
+export async function getSealLeaderboard(): Promise<ModelLeaderboardEntry[]> {
+  const res = await fetch(`${API_BASE}/api/leaderboard`, {
+    cache: "no-store",
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) throw new Error("Failed to fetch SEAL leaderboard");
+  return res.json();
+}
+
+export async function getModelCertificate(modelId: string): Promise<SealCertificate> {
+  const res = await fetch(`${API_BASE}/api/leaderboard/${encodeURIComponent(modelId)}/certificate`, {
+    cache: "no-store",
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) throw new Error("Failed to fetch model certificate");
+  return res.json();
+}
+
+export async function getConstitutionalRules(): Promise<ConstitutionalAxiom[]> {
+  const res = await fetch(`${API_BASE}/api/constitutional/rules`, {
+    cache: "no-store",
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) throw new Error("Failed to fetch constitutional rules");
+  return res.json();
+}
+
+export async function generateRedTeamProbes(vectorCategory?: string, count: number = 3): Promise<RedTeamProbe[]> {
+  const res = await fetch(`${API_BASE}/api/redteam/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ vector_category: vectorCategory, count }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) throw new Error("Failed to generate red team probes");
+  return res.json();
+}
+
+export async function scanGuardThreat(prompt: string): Promise<GuardThreatAnalysis> {
+  const res = await fetch(`${API_BASE}/api/guard/scan`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) throw new Error("Failed to scan prompt with guard");
+  return res.json();
+}

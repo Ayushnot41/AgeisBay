@@ -12,6 +12,9 @@ from services.mediator.crypto import verify_merkle_receipt
 from services.mediator.enclave_runner import EnclaveRunner
 from services.mediator.graph_generator import generate_architecture_graph
 from services.mediator.tinyfish_sentinel import TinyFishSentinel
+from services.mediator.seal_leaderboard import get_seal_leaderboard, generate_model_attestation_certificate
+from services.mediator.constitutional_redteam import get_constitutional_rules, generate_redteam_probes
+from services.mediator.guard_analyzer import scan_prompt_threat
 
 app = FastAPI(
     title="AegisBay Trusted Mediator Gateway",
@@ -388,6 +391,41 @@ async def get_threat_benchmarks():
 async def run_tinyfish_automation(req: TinyFishAutomationRequest):
     return await asyncio.to_thread(tinyfish.dispatch_agent_automation, url=req.url, goal=req.goal)
 
+
+
+
+class RedTeamGenerateRequest(BaseModel):
+    vector_category: Optional[str] = None
+    count: int = Field(default=3, ge=1, le=10)
+
+
+class GuardScanRequest(BaseModel):
+    prompt: str = Field(min_length=1, max_length=25000)
+
+
+@app.get("/api/leaderboard")
+async def get_leaderboard():
+    return get_seal_leaderboard()
+
+
+@app.get("/api/leaderboard/{model_id}/certificate")
+async def get_model_certificate(model_id: str):
+    return generate_model_attestation_certificate(model_id, runner.fingerprint)
+
+
+@app.get("/api/constitutional/rules")
+async def get_constitutional_axioms():
+    return get_constitutional_rules()
+
+
+@app.post("/api/redteam/generate")
+async def generate_adversarial_probes(req: RedTeamGenerateRequest = RedTeamGenerateRequest()):
+    return generate_redteam_probes(vector_category=req.vector_category, count=req.count)
+
+
+@app.post("/api/guard/scan")
+async def analyze_prompt_threat(req: GuardScanRequest):
+    return scan_prompt_threat(req.prompt)
 
 if __name__ == "__main__":
     import uvicorn
