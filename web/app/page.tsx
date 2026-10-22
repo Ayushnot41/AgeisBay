@@ -16,6 +16,7 @@ import CommitRevealDispatcher from "@/components/CommitRevealDispatcher";
 import PairedMatrixComparator from "@/components/PairedMatrixComparator";
 import MerkleTreeVisualizer from "@/components/MerkleTreeVisualizer";
 import TopologyDagModal from "@/components/TopologyDagModal";
+import TinyFishSentinelCard from "@/components/TinyFishSentinelCard";
 import {
   Terminal,
   Database,
@@ -112,7 +113,12 @@ export default function SecOpsWorkbench() {
         isStreaming={isStreaming}
       />
 
-      {/* 2. Four-Panel Operator Workspace Grid */}
+      {/* 2. TinyFish Web Sentinel & Adversarial Egress Probe */}
+      <section className="px-3 pt-3 max-w-[1920px] mx-auto w-full">
+        <TinyFishSentinelCard />
+      </section>
+
+      {/* 3. Four-Panel Operator Workspace Grid */}
       <main className="flex-1 p-3 grid grid-cols-1 lg:grid-cols-2 gap-3 max-w-[1920px] mx-auto w-full">
         {/* Left Column: Panel A (Top) + Panel C (Bottom) */}
         <div className="flex flex-col gap-3 h-full">

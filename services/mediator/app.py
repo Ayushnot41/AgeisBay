@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from services.mediator.ledger import LedgerManager
 from services.mediator.enclave_runner import EnclaveRunner
 from services.mediator.graph_generator import generate_architecture_graph
+from services.mediator.tinyfish_sentinel import TinyFishSentinel
 
 app = FastAPI(
     title="AegisBay Trusted Mediator Gateway",
@@ -30,6 +31,7 @@ ledger = LedgerManager(
     checkpoint_path=os.getenv("CHECKPOINT_EXPORT_PATH", "data/latest_checkpoint.json")
 )
 runner = EnclaveRunner(ledger=ledger, key_dir="data/keys")
+tinyfish = TinyFishSentinel()
 
 # Broadcast queue for SSE
 subscribers: List[asyncio.Queue] = []
@@ -46,6 +48,16 @@ class DispatchRequest(BaseModel):
 
 class TamperRequest(BaseModel):
     run_id: Optional[str] = None
+
+
+class TinyFishProbeRequest(BaseModel):
+    canary_token: str = Field(default="CANARY_SEC_TOKEN_ALPHA_9918")
+    target_url: str = Field(default="https://agent.tinyfish.ai/canary-sink")
+
+
+class TinyFishAutomationRequest(BaseModel):
+    url: str = Field(default="https://scrapeme.live/shop")
+    goal: str = Field(default="Extract security posture headers")
 
 
 async def broadcast_event(event_type: str, data: Any):
@@ -304,6 +316,31 @@ async def sse_events(request: Request):
             "X-Accel-Buffering": "no"
         }
     )
+
+
+@app.get("/api/tinyfish/status")
+async def get_tinyfish_status():
+    return tinyfish.get_status()
+
+
+@app.post("/api/tinyfish/probe/egress")
+async def probe_boundary_egress(req: TinyFishProbeRequest = TinyFishProbeRequest()):
+    result = tinyfish.execute_boundary_egress_probe(
+        canary_token=req.canary_token,
+        target_url=req.target_url
+    )
+    await broadcast_event("tinyfish_probe", result)
+    return result
+
+
+@app.get("/api/tinyfish/threats")
+async def get_threat_benchmarks():
+    return tinyfish.fetch_live_threat_benchmarks()
+
+
+@app.post("/api/tinyfish/run")
+async def run_tinyfish_automation(req: TinyFishAutomationRequest):
+    return tinyfish.dispatch_agent_automation(url=req.url, goal=req.goal)
 
 
 if __name__ == "__main__":

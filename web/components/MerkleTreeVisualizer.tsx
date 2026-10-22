@@ -327,7 +327,7 @@ export default function MerkleTreeVisualizer({
                 </button>
               </div>
               <pre className="overflow-x-auto text-slate-300 bg-black/40 p-2 rounded max-h-24">
-                {JSON.stringify(run.raw_records?.[activeLeafDetail] || {}, null, 2)}
+                {JSON.stringify((run.raw_records as Record<string, any>)?.[activeLeafDetail] || {}, null, 2)}
               </pre>
             </motion.div>
           )}
