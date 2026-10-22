@@ -312,7 +312,9 @@ export async function getPagedRuns(params: {
   if (params.mode) query.set('mode', params.mode);
   if (params.faultClass) query.set('fault_class', params.faultClass);
 
-  const res = await fetch(${API_BASE}/api/runs/paged?, {
+  const qs = query.toString();
+  const url = `${API_BASE}/api/runs/paged${qs ? `?${qs}` : ''}`;
+  const res = await fetch(url, {
     cache: 'no-store',
     signal: AbortSignal.timeout(15000),
   });
