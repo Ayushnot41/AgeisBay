@@ -1,5 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "name": "antigravity-aegis-v",
   "framework": "nextjs"
 }
