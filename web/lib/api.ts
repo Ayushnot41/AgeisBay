@@ -287,3 +287,35 @@ export async function verifyRun(runId: string): Promise<ReceiptVerification> {
   if (!response.ok) throw new Error("Unable to verify receipt");
   return response.json();
 }
+
+export interface PagedRunsResponse {
+  items: EvaluationRun[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export async function getPagedRuns(params: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: string;
+  mode?: string;
+  faultClass?: string;
+} = {}): Promise<PagedRunsResponse> {
+  const query = new URLSearchParams();
+  if (params.page) query.set('page', params.page.toString());
+  if (params.pageSize) query.set('page_size', params.pageSize.toString());
+  if (params.search) query.set('search', params.search);
+  if (params.status) query.set('status', params.status);
+  if (params.mode) query.set('mode', params.mode);
+  if (params.faultClass) query.set('fault_class', params.faultClass);
+
+  const res = await fetch(${API_BASE}/api/runs/paged?, {
+    cache: 'no-store',
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) throw new Error('Failed to fetch paged runs');
+  return res.json();
+}
