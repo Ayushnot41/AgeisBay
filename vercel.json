@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "name": "antigravity-aegis-v",
+  "framework": "nextjs",
+  "buildCommand": "cd web && pnpm build || cd web && npm run build",
+  "outputDirectory": "web/.next",
+  "cleanUrls": true
+}
