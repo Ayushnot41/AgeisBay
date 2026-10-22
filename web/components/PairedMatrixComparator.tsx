@@ -4,23 +4,34 @@ import { Play, FlaskConical } from "lucide-react";
 import { triggerPairedExperiments, AblationMatrixRow } from "@/lib/api";
 import { Panel, Status, ErrorNotice } from "./WorkbenchUI";
 import { faultOptions } from "./CommitRevealDispatcher";
+
+interface PairedMatrixComparatorProps {
+  matrix?: AblationMatrixRow[];
+  matrixData?: AblationMatrixRow[];
+  onTriggerComplete?: () => void;
+  onPairedRunComplete?: () => void;
+}
+
 export default function PairedMatrixComparator({
+  matrix,
   matrixData,
+  onTriggerComplete,
   onPairedRunComplete,
-}: {
-  matrixData: AblationMatrixRow[];
-  onPairedRunComplete: () => void;
-}) {
-  const [busy, setBusy] = useState(false),
-    [chart, setChart] = useState(false),
-    [error, setError] = useState<string | null>(null);
+}: PairedMatrixComparatorProps) {
+  const [busy, setBusy] = useState(false);
+  const [chart, setChart] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const rows = matrixData || matrix || [];
+  const handleComplete = onTriggerComplete || onPairedRunComplete || (() => {});
+
   async function run() {
     if (busy) return;
     setBusy(true);
     setError(null);
     try {
       await triggerPairedExperiments();
-      await onPairedRunComplete();
+      await handleComplete();
     } catch {
       setError(
         "Paired evaluation failed. Refresh the ledger before retrying; some runs may have completed.",
@@ -29,8 +40,10 @@ export default function PairedMatrixComparator({
       setBusy(false);
     }
   }
+
   const label = (id: string) =>
     faultOptions.find(([key]) => key === id)?.[1] || id;
+
   return (
     <Panel
       id="comparison"
@@ -52,7 +65,7 @@ export default function PairedMatrixComparator({
         </button>
       </div>
       <ErrorNotice message={error} />
-      {!matrixData.length ? (
+      {!rows.length ? (
         <div className="empty-state">
           <FlaskConical size={26} />
           <strong>No paired evidence yet</strong>Run paired tests to compare the
@@ -64,7 +77,7 @@ export default function PairedMatrixComparator({
             <span>Rose · Baseline</span>
             <span>Cyan · Hardened</span>
           </div>
-          {matrixData.map((row) => (
+          {rows.map((row) => (
             <div className="chart-row" key={row.fault_class}>
               <span>{label(row.fault_class)}</span>
               <div>
@@ -111,7 +124,7 @@ export default function PairedMatrixComparator({
               </tr>
             </thead>
             <tbody>
-              {matrixData.map((row) => (
+              {rows.map((row) => (
                 <tr key={row.fault_class}>
                   <th scope="row">{label(row.fault_class)}</th>
                   <td>
@@ -138,7 +151,7 @@ export default function PairedMatrixComparator({
         <span role="status">
           {busy
             ? "Collecting paired evidence"
-            : `${matrixData.length} paired scenarios`}
+            : `${rows.length} paired scenarios`}
         </span>
       </div>
     </Panel>

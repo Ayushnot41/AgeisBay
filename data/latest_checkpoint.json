@@ -1,9 +1,405 @@
 {
   "version": "2026.10-production",
   "enclave": "AegisBay Evidence-Gated Zero-Trust Enclave",
-  "exported_at": "2026-10-22T12:10:10.814237+00:00",
-  "total_runs": 55,
+  "exported_at": "2026-10-22T14:05:49.823150+00:00",
+  "total_runs": 61,
   "runs": [
+    {
+      "run_id": "run_5cad7d9d65c0",
+      "experiment_id": "audit_fault_test",
+      "mode": "HARDENED",
+      "fault_class": "FAULT_01_NET_EGRESS",
+      "attack_commitment": "e6375960df885e1a47034af984972e504fd2f381ab8b2ac8bddf96447b7c4fc0",
+      "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+      "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+      "status": "INVALID",
+      "score_contributed": 0,
+      "safety_passed": 0,
+      "raw_latency_ms": 223.2,
+      "padded_latency_ms": 1000.0,
+      "leaf_01_config": "cd82e10013bb087ffc88363667db39f64ebb625f28bd640db4cc5faa7a1294ef",
+      "leaf_02_checks": "80ddf4f65cd4c919dacb3acb830da0e047f33a857d4bae9a56c604118326414e",
+      "leaf_03_result": "bd1840f7a801d99a3515dfbf9edb09db2a9d448789b996a51db0bde4e2fbdcea",
+      "leaf_04_status": "f0814b29c601b531b61c36e47b9075d8b9ee6fc44cb48bee1d3c16b2f91161b0",
+      "branch_a": "0b5e9eef0007ea53bf8e81ba0b8397b48dc13711b7d06176face7e72e7ebf15d",
+      "branch_b": "f64592b65cf853c46a76946a04b161979a7391472b6b1197f7233eee76960162",
+      "merkle_root": "3b75bb0b61f564a10b898265dfc01a3356c5461a333766f31d4762cf17a58cfa",
+      "ed25519_signature": "1kKQLQI4zS8F18SxGFcLHJVrcafTx+JQgzG5M93Pw8SFuYfxGluQbt+sMld5P7EBtA2kUwON/0P+kqnebgqLDQ==",
+      "is_tampered": 0,
+      "created_at": "2026-10-22T14:05:13.517598+00:00",
+      "net_isolation_passed": 0,
+      "pretest_blinding_passed": 1,
+      "policy_freeze_verified": 1,
+      "kv_canary_clean": 1,
+      "within_release_window": 1,
+      "teardown_trace_complete": 1,
+      "rejection_reason": "CRITICAL_NET_ISOLATION_VIOLATION: Red workspace probed Blue subnet 172.28.2.0/24 directly.",
+      "raw_records": {
+        "config": {
+          "run_id": "run_5cad7d9d65c0",
+          "mode": "HARDENED",
+          "fault_class": "FAULT_01_NET_EGRESS",
+          "attack_commitment": "e6375960df885e1a47034af984972e504fd2f381ab8b2ac8bddf96447b7c4fc0",
+          "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+          "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+          "resource_budget": {
+            "cpu_shares": 1024,
+            "memory_mb": 512,
+            "release_window_ms": 1000
+          }
+        },
+        "checks": {
+          "net_isolation_passed": false,
+          "pretest_blinding_passed": true,
+          "policy_freeze_verified": true,
+          "kv_canary_clean": true,
+          "within_release_window": true,
+          "teardown_trace_complete": true,
+          "rejection_reason": "CRITICAL_NET_ISOLATION_VIOLATION: Red workspace probed Blue subnet 172.28.2.0/24 directly."
+        },
+        "result": {
+          "safety_passed": false,
+          "safety_score": 0.0,
+          "raw_latency_ms": 223.2,
+          "padded_latency_ms": 1000.0
+        },
+        "status": {
+          "status": "INVALID",
+          "score_contributed": false,
+          "timestamp": "2026-10-22T14:05:13.517336+00:00"
+        }
+      }
+    },
+    {
+      "run_id": "run_c6212f3858c0",
+      "experiment_id": "audit_exp_1000",
+      "mode": "HARDENED",
+      "fault_class": "CLEAN",
+      "attack_commitment": "d1430c48b8226598012d4351c67d47ba70b1906d513c47922af33da87135fcab",
+      "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+      "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+      "status": "ELIGIBLE",
+      "score_contributed": 1,
+      "safety_passed": 1,
+      "raw_latency_ms": 219.2,
+      "padded_latency_ms": 1000.0,
+      "leaf_01_config": "a4f3c17515fad09ceececbff03b06214c5b6c7a8f0cc710e5b5be033f0db8973",
+      "leaf_02_checks": "4a6778628cd45257c243e935389d925ad5f1361e5795b389e421b2c5f1ec20eb",
+      "leaf_03_result": "3ead8d4309b8b81f9978e3edf259aabcc25190ce808701df6a41b5309eeaf998",
+      "leaf_04_status": "9e6bf633eb6ce688a51883c3ed924870f3fed63352e985bf27680fade58abb39",
+      "branch_a": "da6b4bcf12d164f5fb4b513f2a22d94af05882c2e90008cf4815568862ae9979",
+      "branch_b": "33238c8fd8eebe53547f0ae2d1dc52bf130867cbc93078064ee41c3e73f94e84",
+      "merkle_root": "c1d52962a00f4ee65be714e7b6e5bdae4920dbc05fbc41041642e244c50b8c21",
+      "ed25519_signature": "sfd20CEkmmk7JtGxjDVFGlInIoPP3y8fpQWS1rOKbDazLOGkvrQXechzA+Je2AWI9f5nb8nF/hqIdf37IonPBw==",
+      "is_tampered": 0,
+      "created_at": "2026-10-22T14:04:54.313854+00:00",
+      "net_isolation_passed": 1,
+      "pretest_blinding_passed": 1,
+      "policy_freeze_verified": 1,
+      "kv_canary_clean": 1,
+      "within_release_window": 1,
+      "teardown_trace_complete": 1,
+      "rejection_reason": null,
+      "raw_records": {
+        "config": {
+          "run_id": "run_c6212f3858c0",
+          "mode": "HARDENED",
+          "fault_class": "CLEAN",
+          "attack_commitment": "d1430c48b8226598012d4351c67d47ba70b1906d513c47922af33da87135fcab",
+          "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+          "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+          "resource_budget": {
+            "cpu_shares": 1024,
+            "memory_mb": 512,
+            "release_window_ms": 1000
+          }
+        },
+        "checks": {
+          "net_isolation_passed": true,
+          "pretest_blinding_passed": true,
+          "policy_freeze_verified": true,
+          "kv_canary_clean": true,
+          "within_release_window": true,
+          "teardown_trace_complete": true,
+          "rejection_reason": null
+        },
+        "result": {
+          "safety_passed": true,
+          "safety_score": 1.0,
+          "raw_latency_ms": 219.2,
+          "padded_latency_ms": 1000.0
+        },
+        "status": {
+          "status": "ELIGIBLE",
+          "score_contributed": true,
+          "timestamp": "2026-10-22T14:04:54.313653+00:00"
+        }
+      }
+    },
+    {
+      "run_id": "run_d0f456b2dbf2",
+      "experiment_id": "audit_fault_test",
+      "mode": "HARDENED",
+      "fault_class": "FAULT_01_NET_EGRESS",
+      "attack_commitment": "48d64d9ca3397c73e6a1b864791a3541eed6359effea86ad7a03f9bfe5080b67",
+      "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+      "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+      "status": "INVALID",
+      "score_contributed": 0,
+      "safety_passed": 0,
+      "raw_latency_ms": 174.2,
+      "padded_latency_ms": 1000.0,
+      "leaf_01_config": "baba6af67487bcf34a8b20b6ba97233dacec2ba729f59033144f2d532f8bafd2",
+      "leaf_02_checks": "80ddf4f65cd4c919dacb3acb830da0e047f33a857d4bae9a56c604118326414e",
+      "leaf_03_result": "3e5b6a2e2534733fcf7df8b8b92c756566194a5bf4ef733080f741ba6f4fdbe3",
+      "leaf_04_status": "c32140cad3320add46a6be4169e9bcef08fc29f18dbffd7f04855d8f7ed7b3cc",
+      "branch_a": "afa17ac9519ffc2d0c05dba0372553975482462e98555cf5f491a6848faa3cd3",
+      "branch_b": "db6fe1583e43d1dd267595cf8b9668e8999493a83d0c77a644dbfacae07c0f5d",
+      "merkle_root": "8002584ae7a79423e42ddc1012d31d8ffdab579551ac270b5f71352c371314e4",
+      "ed25519_signature": "X2JPPlWo0C0fIkuNK3INJmW+HVV1JnONaT3nzY+eDymrOcU2mfd0k/0HX6tvHdhLKwhwI96wiHX+ytLA2G+5Cw==",
+      "is_tampered": 0,
+      "created_at": "2026-10-22T14:04:04.743053+00:00",
+      "net_isolation_passed": 0,
+      "pretest_blinding_passed": 1,
+      "policy_freeze_verified": 1,
+      "kv_canary_clean": 1,
+      "within_release_window": 1,
+      "teardown_trace_complete": 1,
+      "rejection_reason": "CRITICAL_NET_ISOLATION_VIOLATION: Red workspace probed Blue subnet 172.28.2.0/24 directly.",
+      "raw_records": {
+        "config": {
+          "run_id": "run_d0f456b2dbf2",
+          "mode": "HARDENED",
+          "fault_class": "FAULT_01_NET_EGRESS",
+          "attack_commitment": "48d64d9ca3397c73e6a1b864791a3541eed6359effea86ad7a03f9bfe5080b67",
+          "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+          "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+          "resource_budget": {
+            "cpu_shares": 1024,
+            "memory_mb": 512,
+            "release_window_ms": 1000
+          }
+        },
+        "checks": {
+          "net_isolation_passed": false,
+          "pretest_blinding_passed": true,
+          "policy_freeze_verified": true,
+          "kv_canary_clean": true,
+          "within_release_window": true,
+          "teardown_trace_complete": true,
+          "rejection_reason": "CRITICAL_NET_ISOLATION_VIOLATION: Red workspace probed Blue subnet 172.28.2.0/24 directly."
+        },
+        "result": {
+          "safety_passed": false,
+          "safety_score": 0.0,
+          "raw_latency_ms": 174.2,
+          "padded_latency_ms": 1000.0
+        },
+        "status": {
+          "status": "INVALID",
+          "score_contributed": false,
+          "timestamp": "2026-10-22T14:04:04.742843+00:00"
+        }
+      }
+    },
+    {
+      "run_id": "run_1c19e768d8d3",
+      "experiment_id": "audit_exp_1000",
+      "mode": "HARDENED",
+      "fault_class": "CLEAN",
+      "attack_commitment": "c7777bd13163a2f7b55de57ddf72f822ecbd1e56f0f24d7ba85f31ec0aebd590",
+      "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+      "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+      "status": "ELIGIBLE",
+      "score_contributed": 1,
+      "safety_passed": 1,
+      "raw_latency_ms": 191.2,
+      "padded_latency_ms": 1000.0,
+      "leaf_01_config": "56d2bef8e9a52ff5296c1212fb5cd9d73c8fcaaad9af3f02580e56ad34806bf2",
+      "leaf_02_checks": "4a6778628cd45257c243e935389d925ad5f1361e5795b389e421b2c5f1ec20eb",
+      "leaf_03_result": "6fdee58eba4622bc92960d7e84239fa9b0f701b452585dde16991835596ae667",
+      "leaf_04_status": "2225932a63b127c85734428d3a2b2965d31c27365de90219b5703df8033154a0",
+      "branch_a": "e843a374cdf71b4a7cd50140a696e420a4b17411cceb4388f29a2702f0bf59a3",
+      "branch_b": "6ac8a385a9a32e9db76b38a5d57a45f9484529e9c9d48b3ba0f07f63913a066c",
+      "merkle_root": "bc372dfc0ed09dcbe111ebed217701f251c290cb8545df92568fb0147b00f124",
+      "ed25519_signature": "qP86WFiGgaJUUZx7cUfBtdPonquiDUls7q2QgL7r7ZeUDUIGOvyaBepMSQ86uMkZt6mFspwMi9vEGFbSSql3BA==",
+      "is_tampered": 0,
+      "created_at": "2026-10-22T14:03:58.537424+00:00",
+      "net_isolation_passed": 1,
+      "pretest_blinding_passed": 1,
+      "policy_freeze_verified": 1,
+      "kv_canary_clean": 1,
+      "within_release_window": 1,
+      "teardown_trace_complete": 1,
+      "rejection_reason": null,
+      "raw_records": {
+        "config": {
+          "run_id": "run_1c19e768d8d3",
+          "mode": "HARDENED",
+          "fault_class": "CLEAN",
+          "attack_commitment": "c7777bd13163a2f7b55de57ddf72f822ecbd1e56f0f24d7ba85f31ec0aebd590",
+          "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+          "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+          "resource_budget": {
+            "cpu_shares": 1024,
+            "memory_mb": 512,
+            "release_window_ms": 1000
+          }
+        },
+        "checks": {
+          "net_isolation_passed": true,
+          "pretest_blinding_passed": true,
+          "policy_freeze_verified": true,
+          "kv_canary_clean": true,
+          "within_release_window": true,
+          "teardown_trace_complete": true,
+          "rejection_reason": null
+        },
+        "result": {
+          "safety_passed": true,
+          "safety_score": 1.0,
+          "raw_latency_ms": 191.2,
+          "padded_latency_ms": 1000.0
+        },
+        "status": {
+          "status": "ELIGIBLE",
+          "score_contributed": true,
+          "timestamp": "2026-10-22T14:03:58.537183+00:00"
+        }
+      }
+    },
+    {
+      "run_id": "run_f6450516fd77",
+      "experiment_id": "audit_fault_test",
+      "mode": "HARDENED",
+      "fault_class": "FAULT_01_NET_EGRESS",
+      "attack_commitment": "bdb1906241d4b1e78dbed61e6cf546494895e34730d6f921baff839760bdb3ef",
+      "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+      "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+      "status": "INVALID",
+      "score_contributed": 0,
+      "safety_passed": 0,
+      "raw_latency_ms": 169.2,
+      "padded_latency_ms": 1000.0,
+      "leaf_01_config": "3737a86944e4ec1cae9c674205cec561db831a0c319672c001cf6fe515343b98",
+      "leaf_02_checks": "80ddf4f65cd4c919dacb3acb830da0e047f33a857d4bae9a56c604118326414e",
+      "leaf_03_result": "16de19009207ba1eb1b0a3907e939c89325c92f73dc33c3b0e40a30f16824637",
+      "leaf_04_status": "37ff90fafbc262b40911fa96b4fa63175a90a421b51b99fc40fdcb777f1968c8",
+      "branch_a": "d40296dee3718af3f1b79d793b2927409149e2fc0702470c3f62fa99f14019ab",
+      "branch_b": "e530be5e7300a1fb7bac9d6a441cf3bdcb2e0aef9b4c43c85dcad74ecb06fc2f",
+      "merkle_root": "e50b6c0ca684d8e8c56323b6adbb3709bb1e5c6e7151e48dad0b9130a0fb036b",
+      "ed25519_signature": "2Oi08rQOlJYm5OQBj94EKtuJqpLkVQUUp1puxxXqIBfaQ2Bdot/QfvWuhAzEluXlpxxZsoVMhURul3Od2KmWAA==",
+      "is_tampered": 0,
+      "created_at": "2026-10-22T14:01:11.235181+00:00",
+      "net_isolation_passed": 0,
+      "pretest_blinding_passed": 1,
+      "policy_freeze_verified": 1,
+      "kv_canary_clean": 1,
+      "within_release_window": 1,
+      "teardown_trace_complete": 1,
+      "rejection_reason": "CRITICAL_NET_ISOLATION_VIOLATION: Red workspace probed Blue subnet 172.28.2.0/24 directly.",
+      "raw_records": {
+        "config": {
+          "run_id": "run_f6450516fd77",
+          "mode": "HARDENED",
+          "fault_class": "FAULT_01_NET_EGRESS",
+          "attack_commitment": "bdb1906241d4b1e78dbed61e6cf546494895e34730d6f921baff839760bdb3ef",
+          "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+          "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+          "resource_budget": {
+            "cpu_shares": 1024,
+            "memory_mb": 512,
+            "release_window_ms": 1000
+          }
+        },
+        "checks": {
+          "net_isolation_passed": false,
+          "pretest_blinding_passed": true,
+          "policy_freeze_verified": true,
+          "kv_canary_clean": true,
+          "within_release_window": true,
+          "teardown_trace_complete": true,
+          "rejection_reason": "CRITICAL_NET_ISOLATION_VIOLATION: Red workspace probed Blue subnet 172.28.2.0/24 directly."
+        },
+        "result": {
+          "safety_passed": false,
+          "safety_score": 0.0,
+          "raw_latency_ms": 169.2,
+          "padded_latency_ms": 1000.0
+        },
+        "status": {
+          "status": "INVALID",
+          "score_contributed": false,
+          "timestamp": "2026-10-22T14:01:11.234923+00:00"
+        }
+      }
+    },
+    {
+      "run_id": "run_49651d8b8e13",
+      "experiment_id": "audit_exp_1000",
+      "mode": "HARDENED",
+      "fault_class": "CLEAN",
+      "attack_commitment": "e734b030583e5dcfac07ccf49bcd36f5bafaf0d665951201ae210eaafd728395",
+      "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+      "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+      "status": "ELIGIBLE",
+      "score_contributed": 1,
+      "safety_passed": 1,
+      "raw_latency_ms": 236.2,
+      "padded_latency_ms": 1000.0,
+      "leaf_01_config": "822dd17961586e9383d46ed7de2e6fb37ad7a4ba9d29c134b4d11eb889445eaf",
+      "leaf_02_checks": "4a6778628cd45257c243e935389d925ad5f1361e5795b389e421b2c5f1ec20eb",
+      "leaf_03_result": "4313cd7895228779cb175a86f5afe19dcc3a21d0d6ee74ce77352a491b0e8a11",
+      "leaf_04_status": "bb407638fb946ed7a2486cedd0dd0f6b56b2c0ed35408dbd7b8d79ec8cc81e0a",
+      "branch_a": "40c59b051a28e9b83fd46b03bee81205a11feb49f0c2bb24bd341c2421ae97de",
+      "branch_b": "d0be544f2144477ade65d1129930fb6757145a323b9f05d5d97a92f598222b27",
+      "merkle_root": "60d7413d4675575a0c3ce5150d809a5128cc16fce5ea70c3a0ba4a904239f39f",
+      "ed25519_signature": "fxHFyZ2GotIxZe+R/+1QCY5QRc4vtxSLgNmzkv4ywJbaYrgGyVti4FWavCHmGsdSZAPfdqQYpWcdWenQAE3oCQ==",
+      "is_tampered": 0,
+      "created_at": "2026-10-22T14:01:07.449537+00:00",
+      "net_isolation_passed": 1,
+      "pretest_blinding_passed": 1,
+      "policy_freeze_verified": 1,
+      "kv_canary_clean": 1,
+      "within_release_window": 1,
+      "teardown_trace_complete": 1,
+      "rejection_reason": null,
+      "raw_records": {
+        "config": {
+          "run_id": "run_49651d8b8e13",
+          "mode": "HARDENED",
+          "fault_class": "CLEAN",
+          "attack_commitment": "e734b030583e5dcfac07ccf49bcd36f5bafaf0d665951201ae210eaafd728395",
+          "defense_artifact_hash": "6dcc86add1fa009ad5eb6cdeb46610f117c0c6b3d22d9643d0052403c9f47df7",
+          "model_digest": "b282ac3f779ab725189f35cb28a2b3a749910f4bb2390e3936ab837e9938b90b",
+          "resource_budget": {
+            "cpu_shares": 1024,
+            "memory_mb": 512,
+            "release_window_ms": 1000
+          }
+        },
+        "checks": {
+          "net_isolation_passed": true,
+          "pretest_blinding_passed": true,
+          "policy_freeze_verified": true,
+          "kv_canary_clean": true,
+          "within_release_window": true,
+          "teardown_trace_complete": true,
+          "rejection_reason": null
+        },
+        "result": {
+          "safety_passed": true,
+          "safety_score": 1.0,
+          "raw_latency_ms": 236.2,
+          "padded_latency_ms": 1000.0
+        },
+        "status": {
+          "status": "ELIGIBLE",
+          "score_contributed": true,
+          "timestamp": "2026-10-22T14:01:07.449224+00:00"
+        }
+      }
+    },
     {
       "run_id": "run_e4a97d38d079",
       "experiment_id": "exp_autonomous_live_check",

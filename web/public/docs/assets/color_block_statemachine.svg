@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 260" width="100%" height="260" style="background:#07090E; border:1px solid #1E293B; border-radius:8px;">
+  <!-- Header Title -->
+  <rect x="0" y="0" width="960" height="34" fill="#0F172A" rx="8"/>
+  <text x="20" y="22" font-family="monospace" font-size="12" fill="#38BDF8" font-weight="700">AEGISBAY EVIDENCE-GATED STATE MACHINE &amp; SCORE CONTAMINATION BARRIER</text>
+  <text x="940" y="22" font-family="monospace" font-size="10" fill="#94A3B8" text-anchor="end">KERNEL ASSERTION GATED</text>
+
+  <!-- Initial State: Run Dispatched -->
+  <g transform="translate(30, 95)">
+    <rect x="0" y="0" width="160" height="70" rx="6" fill="#0C1524" stroke="#06B6D4" stroke-width="1.8"/>
+    <text x="80" y="24" font-family="monospace" font-size="10.5" fill="#38BDF8" text-anchor="middle" font-weight="700">RUN DISPATCHED</text>
+    <text x="80" y="42" font-family="monospace" font-size="8.5" fill="#94A3B8" text-anchor="middle">Sealed Commit-Reveal</text>
+    <text x="80" y="56" font-family="monospace" font-size="8" fill="#06B6D4" text-anchor="middle">AES-256-GCM + AAD</text>
+  </g>
+
+  <!-- Arrow to Kernel Evaluation -->
+  <path d="M 195 130 L 255 130" stroke="#06B6D4" stroke-width="2"/>
+  <polygon points="255,130 245,125 245,135" fill="#06B6D4"/>
+
+  <!-- Decision Node: 6 Kernel Boundary Checks -->
+  <g transform="translate(260, 75)">
+    <rect x="0" y="0" width="220" height="110" rx="6" fill="#0C1B2E" stroke="#38BDF8" stroke-width="1.8"/>
+    <text x="110" y="22" font-family="monospace" font-size="10.5" fill="#38BDF8" text-anchor="middle" font-weight="700">6 KERNEL CHECKS</text>
+    <text x="110" y="40" font-family="monospace" font-size="8" fill="#CBD5E1" text-anchor="middle">1. net_isolation_passed</text>
+    <text x="110" y="54" font-family="monospace" font-size="8" fill="#CBD5E1" text-anchor="middle">2. pretest_blinding_passed</text>
+    <text x="110" y="68" font-family="monospace" font-size="8" fill="#CBD5E1" text-anchor="middle">3. policy_freeze_verified</text>
+    <text x="110" y="82" font-family="monospace" font-size="8" fill="#CBD5E1" text-anchor="middle">4. kv_canary_clean</text>
+    <text x="110" y="96" font-family="monospace" font-size="8" fill="#CBD5E1" text-anchor="middle">5. 1000ms release • 6. trace</text>
+  </g>
+
+  <!-- Vector to ELIGIBLE (Green) -->
+  <path d="M 480 100 L 590 65" stroke="#10B981" stroke-width="2"/>
+  <polygon points="590,65 578,63 583,73" fill="#10B981"/>
+  <text x="535" y="74" font-family="monospace" font-size="8.5" fill="#34D399" text-anchor="middle">All 6 Pass</text>
+
+  <!-- Outcome 1: ELIGIBLE (Green Block) -->
+  <g transform="translate(600, 42)">
+    <rect x="0" y="0" width="330" height="52" rx="6" fill="#062419" stroke="#10B981" stroke-width="2"/>
+    <text x="165" y="20" font-family="monospace" font-size="11" fill="#34D399" text-anchor="middle" font-weight="700">STATUS: ELIGIBLE (SCORE = 1.0)</text>
+    <text x="165" y="38" font-family="monospace" font-size="8.5" fill="#A7F3D0" text-anchor="middle">Evidence-Gated: Contributes to Safety Benchmark Rating</text>
+  </g>
+
+  <!-- Vector to INVALID (Red) -->
+  <path d="M 480 130 L 590 130" stroke="#EF4444" stroke-width="2"/>
+  <polygon points="590,130 580,125 580,135" fill="#EF4444"/>
+  <text x="535" y="124" font-family="monospace" font-size="8.5" fill="#F87171" text-anchor="middle">Security Fail</text>
+
+  <!-- Outcome 2: INVALID (Red Block) -->
+  <g transform="translate(600, 105)">
+    <rect x="0" y="0" width="330" height="52" rx="6" fill="#240A0F" stroke="#EF4444" stroke-width="2"/>
+    <text x="165" y="20" font-family="monospace" font-size="11" fill="#F87171" text-anchor="middle" font-weight="700">STATUS: INVALID (SCORE = 0.0 REJECTED)</text>
+    <text x="165" y="38" font-family="monospace" font-size="8.5" fill="#FECACA" text-anchor="middle">Boundary Breach (Egress, Peek, Drift, or Canary Bleed)</text>
+  </g>
+
+  <!-- Vector to INCOMPLETE (Amber) -->
+  <path d="M 480 160 L 590 195" stroke="#F59E0B" stroke-width="2"/>
+  <polygon points="590,195 583,187 578,197" fill="#F59E0B"/>
+  <text x="535" y="186" font-family="monospace" font-size="8.5" fill="#FBBF24" text-anchor="middle">Overrun/Drop</text>
+
+  <!-- Outcome 3: INCOMPLETE (Amber Block) -->
+  <g transform="translate(600, 168)">
+    <rect x="0" y="0" width="330" height="52" rx="6" fill="#241806" stroke="#F59E0B" stroke-width="2"/>
+    <text x="165" y="20" font-family="monospace" font-size="11" fill="#FBBF24" text-anchor="middle" font-weight="700">STATUS: INCOMPLETE (SCORE = 0.0 WITHHELD)</text>
+    <text x="165" y="38" font-family="monospace" font-size="8.5" fill="#FDE68A" text-anchor="middle">Execution Deadline Exceeded or Missing Worker Teardown</text>
+  </g>
+</svg>

@@ -1,0 +1,19 @@
+{
+  "name": "AegisBay - Evidence-Gated AI Safety Testing Enclave",
+  "short_name": "AegisBay",
+  "description": "Blinded Zero-Trust Evaluation Enclave & Cryptographic AI Safety Testing - Hack in Hills '26",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07090E",
+  "theme_color": "#07090E",
+  "orientation": "any",
+  "categories": ["security", "developer", "utilities"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

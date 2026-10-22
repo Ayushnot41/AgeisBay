@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" width="100%" height="300" style="background:#07090E; border:1px solid #1E293B; border-radius:8px;">
+  <!-- Header Title -->
+  <rect x="0" y="0" width="960" height="34" fill="#0F172A" rx="8"/>
+  <text x="20" y="22" font-family="monospace" font-size="12" fill="#38BDF8" font-weight="700">AEGISBAY RFC 8785 4-LEAF DETERMINISTIC MERKLE PROVENANCE TREE</text>
+  <text x="940" y="22" font-family="monospace" font-size="10" fill="#10B981" text-anchor="end">Ed25519 DIGITAL SIGNATURE CERTIFIED</text>
+
+  <!-- Root Node (Top) -->
+  <g transform="translate(360, 48)">
+    <rect x="0" y="0" width="240" height="46" rx="6" fill="#06241D" stroke="#10B981" stroke-width="2"/>
+    <text x="120" y="18" font-family="monospace" font-size="11" fill="#34D399" text-anchor="middle" font-weight="700">MERKLE ROOT HASH</text>
+    <text x="120" y="34" font-family="monospace" font-size="8.5" fill="#A7F3D0" text-anchor="middle">SHA256("root:" || Branch_A || ":" || Branch_B)</text>
+  </g>
+
+  <!-- Connecting Lines: Root to Branches -->
+  <path d="M 420 94 L 250 130" stroke="#10B981" stroke-width="1.8"/>
+  <path d="M 540 94 L 710 130" stroke="#10B981" stroke-width="1.8"/>
+
+  <!-- Branch A Node -->
+  <g transform="translate(140, 130)">
+    <rect x="0" y="0" width="220" height="42" rx="6" fill="#0C1F38" stroke="#38BDF8" stroke-width="1.8"/>
+    <text x="110" y="18" font-family="monospace" font-size="10.5" fill="#38BDF8" text-anchor="middle" font-weight="700">BRANCH A</text>
+    <text x="110" y="32" font-family="monospace" font-size="8" fill="#BAE6FD" text-anchor="middle">SHA256("branch:A:" || Leaf_1 || ":" || Leaf_2)</text>
+  </g>
+
+  <!-- Branch B Node -->
+  <g transform="translate(600, 130)">
+    <rect x="0" y="0" width="220" height="42" rx="6" fill="#0C1F38" stroke="#38BDF8" stroke-width="1.8"/>
+    <text x="110" y="18" font-family="monospace" font-size="10.5" fill="#38BDF8" text-anchor="middle" font-weight="700">BRANCH B</text>
+    <text x="110" y="32" font-family="monospace" font-size="8" fill="#BAE6FD" text-anchor="middle">SHA256("branch:B:" || Leaf_3 || ":" || Leaf_4)</text>
+  </g>
+
+  <!-- Connecting Lines: Branches to Leaves -->
+  <path d="M 195 172 L 120 215" stroke="#06B6D4" stroke-width="1.5"/>
+  <path d="M 305 172 L 360 215" stroke="#F59E0B" stroke-width="1.5"/>
+  <path d="M 655 172 L 600 215" stroke="#3B82F6" stroke-width="1.5"/>
+  <path d="M 765 172 L 840 215" stroke="#A855F7" stroke-width="1.5"/>
+
+  <!-- Leaf 1: Config (Cyan) -->
+  <g transform="translate(20, 215)">
+    <rect x="0" y="0" width="200" height="68" rx="6" fill="#081822" stroke="#06B6D4" stroke-width="1.8"/>
+    <text x="100" y="18" font-family="monospace" font-size="10" fill="#38BDF8" text-anchor="middle" font-weight="700">LEAF 1: CONFIG</text>
+    <text x="100" y="34" font-family="monospace" font-size="8" fill="#94A3B8" text-anchor="middle">run_id • model_id • prompt_hash</text>
+    <text x="100" y="48" font-family="monospace" font-size="8" fill="#94A3B8" text-anchor="middle">defense_artifact_hash</text>
+    <text x="100" y="60" font-family="monospace" font-size="7.5" fill="#06B6D4" text-anchor="middle">RFC 8785 Canonical JSON</text>
+  </g>
+
+  <!-- Leaf 2: Checks (Amber) -->
+  <g transform="translate(260, 215)">
+    <rect x="0" y="0" width="200" height="68" rx="6" fill="#1C1508" stroke="#F59E0B" stroke-width="1.8"/>
+    <text x="100" y="18" font-family="monospace" font-size="10" fill="#FBBF24" text-anchor="middle" font-weight="700">LEAF 2: CHECKS</text>
+    <text x="100" y="34" font-family="monospace" font-size="8" fill="#94A3B8" text-anchor="middle">net_isolation • pretest_blind</text>
+    <text x="100" y="48" font-family="monospace" font-size="8" fill="#94A3B8" text-anchor="middle">policy_freeze • kv_canary • 1000ms</text>
+    <text x="100" y="60" font-family="monospace" font-size="7.5" fill="#F59E0B" text-anchor="middle">6-Point Kernel Assertions</text>
+  </g>
+
+  <!-- Leaf 3: Result (Blue) -->
+  <g transform="translate(500, 215)">
+    <rect x="0" y="0" width="200" height="68" rx="6" fill="#0B1322" stroke="#3B82F6" stroke-width="1.8"/>
+    <text x="100" y="18" font-family="monospace" font-size="10" fill="#60A5FA" text-anchor="middle" font-weight="700">LEAF 3: RESULT</text>
+    <text x="100" y="34" font-family="monospace" font-size="8" fill="#94A3B8" text-anchor="middle">safety_passed (0 or 1)</text>
+    <text x="100" y="48" font-family="monospace" font-size="8" fill="#94A3B8" text-anchor="middle">raw_latency • padded_latency</text>
+    <text x="100" y="60" font-family="monospace" font-size="7.5" fill="#3B82F6" text-anchor="middle">1000.0ms Shuffled Window</text>
+  </g>
+
+  <!-- Leaf 4: Status (Purple) -->
+  <g transform="translate(740, 215)">
+    <rect x="0" y="0" width="200" height="68" rx="6" fill="#170E24" stroke="#A855F7" stroke-width="1.8"/>
+    <text x="100" y="18" font-family="monospace" font-size="10" fill="#C084FC" text-anchor="middle" font-weight="700">LEAF 4: STATUS</text>
+    <text x="100" y="34" font-family="monospace" font-size="8" fill="#94A3B8" text-anchor="middle">ELIGIBLE • INVALID • INCOMPLETE</text>
+    <text x="100" y="48" font-family="monospace" font-size="8" fill="#94A3B8" text-anchor="middle">score_contributed (0 or 1)</text>
+    <text x="100" y="60" font-family="monospace" font-size="7.5" fill="#A855F7" text-anchor="middle">Evidence-Gated Transition</text>
+  </g>
+</svg>
