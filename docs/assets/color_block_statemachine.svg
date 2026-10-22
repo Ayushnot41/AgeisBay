@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 260" width="100%" height="260" style="background:#07090E; border:1px solid #1E293B; border-radius:8px;">
   <!-- Header Title -->
   <rect x="0" y="0" width="960" height="34" fill="#0F172A" rx="8"/>
-  <text x="20" y="22" font-family="monospace" font-size="12" fill="#38BDF8" font-weight="700">AEGISBAY EVIDENCE-GATED STATE MACHINE & SCORE CONTAMINATION BARRIER</text>
+  <text x="20" y="22" font-family="monospace" font-size="12" fill="#38BDF8" font-weight="700">AEGISBAY EVIDENCE-GATED STATE MACHINE &amp; SCORE CONTAMINATION BARRIER</text>
   <text x="940" y="22" font-family="monospace" font-size="10" fill="#94A3B8" text-anchor="end">KERNEL ASSERTION GATED</text>
 
   <!-- Initial State: Run Dispatched -->

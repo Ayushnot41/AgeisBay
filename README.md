@@ -15,29 +15,38 @@
 
 <br/>
 
+[![Live Online Console](https://img.shields.io/badge/Live%20Online-Active%20Public%20Enclave-10B981.svg?style=for-the-badge&logo=cloudflare)](https://pickup-collecting-improved-florist.trycloudflare.com)
+[![Official PDF Dossier](https://img.shields.io/badge/Official%20PDF-Download%20Dossier-0284C7.svg?style=for-the-badge&logo=adobeacrobatreader)](https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/AEGISBAY_DOSSIER.pdf)
+
+<br/>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-06B6D4.svg?style=flat-square)](LICENSE)
 [![Python: 3.11+](https://img.shields.io/badge/Python-3.11+-3B82F6.svg?style=flat-square)](https://python.org)
 [![Next.js: 15.5](https://img.shields.io/badge/Next.js-15.5-10B981.svg?style=flat-square)](https://nextjs.org)
 [![TinyFish: Sentinel Verified](https://img.shields.io/badge/TinyFish-Sentinel%20Verified-8B5CF6.svg?style=flat-square)](https://agent.tinyfish.ai)
 [![Score Contamination: 0.0%](https://img.shields.io/badge/Contamination-0.0%25%20(p%3C0.001)-10B981.svg?style=flat-square)](https://github.com/Ayushnot41/AgeisBay)
 [![Merkle RFC: 8785](https://img.shields.io/badge/Merkle-RFC%208785%20Ed25519-F59E0B.svg?style=flat-square)](https://github.com/Ayushnot41/AgeisBay)
-[![Official PDF Dossier](https://img.shields.io/badge/Documentation-Official%20PDF%20Dossier-0284C7.svg?style=flat-square)](AEGISBAY_DOSSIER.pdf)
 
 <br/>
 
-<!-- 3D Motion Graphics Banner (SVG with CSS Keyframe Orbital Animations) -->
+<!-- High-Resolution Visual Architecture Banner (100% Guaranteed Render Across All GitHub Clients) -->
 <p align="center">
-  <img src="docs/assets/aegisbay_3d_motion.svg" alt="AegisBay 3D Motion Architecture Banner" width="100%" />
+  <a href="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/aegisbay_3d_motion.svg">
+    <img src="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/aegisbay_3d_motion.png" alt="AegisBay 3D Architecture Banner" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
+  </a>
+  <br/>
+  <sub><i>Click image above to open the full interactive animated SVG vector graphic.</i></sub>
 </p>
 
 </div>
 
 ---
 
-## Technical Dossier & Quick Access
+## Live System Access & Technical Documentation
 
-- **Official PDF Specification**: [AEGISBAY_DOSSIER.pdf](AEGISBAY_DOSSIER.pdf) (Publication-Grade Whitepaper & Verification Guide)
-- **Interactive SecOps Console**: `http://localhost:3000` (Next.js 15.5 multi-view workbench with pagination)
+- **Live Public Web Enclave**: [https://pickup-collecting-improved-florist.trycloudflare.com](https://pickup-collecting-improved-florist.trycloudflare.com) (Accessible globally on phone, tablet, and desktop)
+- **Official Technical Whitepaper (PDF)**: [AEGISBAY_DOSSIER.pdf](https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/AEGISBAY_DOSSIER.pdf) (Publication-Grade 9-Page Dossier)
+- **Local SecOps Console**: `http://localhost:3000` (Next.js 15.5 multi-view workbench with pagination)
 - **Mediator Gateway API**: `http://localhost:8000` (FastAPI zero-trust execution gateway)
 - **Offline CLI Verifier**: `python -m services.verifier.verify_cli --checkpoint data/latest_checkpoint.json`
 
@@ -70,7 +79,9 @@ AegisBay is a **tamper-proof, zero-trust digital exam vault**:
 ## Color-Coded Enclave Architecture
 
 <p align="center">
-  <img src="docs/assets/color_block_architecture.svg" alt="AegisBay Color Block Architecture" width="100%" />
+  <a href="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_architecture.svg">
+    <img src="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_architecture.png" alt="AegisBay Color Block Architecture" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
+  </a>
 </p>
 
 ### Enclave Subnet Isolation Rules:
@@ -101,7 +112,9 @@ AegisBay is a **tamper-proof, zero-trust digital exam vault**:
 ## 4-Leaf Merkle Tree & Cryptographic Specifications
 
 <p align="center">
-  <img src="docs/assets/color_block_merkle.svg" alt="AegisBay 4-Leaf Merkle Tree" width="100%" />
+  <a href="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_merkle.svg">
+    <img src="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_merkle.png" alt="AegisBay 4-Leaf Merkle Tree" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
+  </a>
 </p>
 
 Every run committed to the SQLite ledger generates a deterministic 4-leaf Merkle Tree formatted in strict RFC 8785 canonical JSON:
@@ -122,7 +135,9 @@ $$\text{Signature} = \text{Base64}(\text{Ed25519\_Sign}(\text{PrivateKey}_{\text
 ## Evidence-Gated State Machine & The 6 Controlled Faults
 
 <p align="center">
-  <img src="docs/assets/color_block_statemachine.svg" alt="AegisBay Evidence-Gated State Machine" width="100%" />
+  <a href="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_statemachine.svg">
+    <img src="https://raw.githubusercontent.com/Ayushnot41/AgeisBay/main/docs/assets/color_block_statemachine.png" alt="AegisBay Evidence-Gated State Machine" width="100%" style="border-radius:8px; border:1px solid #1E293B;" />
+  </a>
 </p>
 
 | Fault Identifier | Real-World Attack Scenario | Kernel Interception Mechanism | Enclave Status | Score Contributed |
@@ -159,32 +174,6 @@ AegisBay provides a zero-dependency offline verification tool for auditors and r
 python -m services.verifier.verify_cli --checkpoint data/latest_checkpoint.json
 ```
 
-**Real Terminal Output:**
-```
-===================================================================================================================
-  AEGISBAY OFFLINE CRYPTOGRAPHIC AUDIT VERIFIER (VERSION 2026.10-PRODUCTION)
-  Evidence-Gated AI Safety Testing & Blinded Zero-Trust Evaluation Enclave
-===================================================================================================================
-  Target Checkpoint: data/latest_checkpoint.json
-  Exported At:       2026-10-22T10:07:32.321824+00:00
-  Total Runs:        48
--------------------------------------------------------------------------------------------------------------------
-  RUN ID             | MODE     | FAULT CLASS                | STATUS     | MERKLE ROOT  | ED25519   | AUDIT OUTCOME
--------------------------------------------------------------------------------------------------------------------
-  run_1783a7f978ae   | HARDENED | CLEAN                      | ELIGIBLE   | PASS         | PASS      | [VERIFIED AUTHENTIC]
-  run_e446e220a5cc   | HARDENED | FAULT_06_TELEMETRY_DROP    | INCOMPLETE | PASS         | PASS      | [VERIFIED AUTHENTIC]
-  run_52bc9e61a8d5   | HARDENED | FAULT_05_DEADLINE_OVERRUN  | INCOMPLETE | PASS         | PASS      | [VERIFIED AUTHENTIC]
-  run_2c60ec2d76f5   | HARDENED | FAULT_04_KV_CANARY_BLEED   | INVALID    | PASS         | PASS      | [VERIFIED AUTHENTIC]
-  run_aa030e35576d   | HARDENED | FAULT_03_POLICY_DRIFT      | INVALID    | PASS         | PASS      | [VERIFIED AUTHENTIC]
-  run_2f99d585ce8f   | HARDENED | FAULT_02_PRETEST_PEEK      | INVALID    | PASS         | PASS      | [VERIFIED AUTHENTIC]
-  run_4141a6e70c00   | HARDENED | FAULT_01_NET_EGRESS        | INVALID    | PASS         | PASS      | [VERIFIED AUTHENTIC]
-  ...
--------------------------------------------------------------------------------------------------------------------
-  AUDIT SUMMARY: 48 Verified Authentic | 0 Tampered / Corrupted
-===================================================================================================================
-[+] Cryptographic Proof Complete: All 4 Merkle leaves, branch pairs, root hashes, and Ed25519 signatures verified.
-```
-
 ---
 
 ## Full Automated Test Suite (20/20 Passing)
@@ -198,6 +187,9 @@ pytest -v harness/test_workbench_api.py
 
 # 3. Run Automated 7-Layer Fullstack Audit
 python harness/audit_fullstack.py
+
+# 4. Run Complete Autonomous Workability Audit
+python harness/check_all_functions.py
 ```
 
 ---
@@ -222,7 +214,7 @@ pnpm start
 ```
 
 ### 3. Open Operator Console
-Open `http://localhost:3000` in your browser.
+Open `http://localhost:3000` or the live public tunnel at `https://pickup-collecting-improved-florist.trycloudflare.com`.
 
 ---
 
