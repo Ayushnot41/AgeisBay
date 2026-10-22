@@ -168,6 +168,60 @@ class LedgerManager:
                 runs.append(item)
             return runs
 
+    def get_paged_runs(
+        self,
+        limit: int = 10,
+        offset: int = 0,
+        search: Optional[str] = None,
+        status: Optional[str] = None,
+        mode: Optional[str] = None,
+        fault_class: Optional[str] = None
+    ) -> tuple:
+        with self._connection() as conn:
+            cursor = conn.cursor()
+            conditions = []
+            params = []
+            if search:
+                conditions.append("(r.run_id LIKE ? OR r.experiment_id LIKE ? OR r.fault_class LIKE ?)")
+                wildcard = f"%{search}%"
+                params.extend([wildcard, wildcard, wildcard])
+            if status:
+                conditions.append("r.status = ?")
+                params.append(status)
+            if mode:
+                conditions.append("r.mode = ?")
+                params.append(mode)
+            if fault_class:
+                conditions.append("r.fault_class = ?")
+                params.append(fault_class)
+
+            where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+
+            cursor.execute(f"SELECT COUNT(*) FROM runs r {where_clause}", params)
+            total = cursor.fetchone()[0]
+
+            query = f"""
+                SELECT r.*,
+                       b.net_isolation_passed, b.pretest_blinding_passed,
+                       b.policy_freeze_verified, b.kv_canary_clean,
+                       b.within_release_window, b.teardown_trace_complete,
+                       b.rejection_reason
+                FROM runs r
+                LEFT JOIN boundary_checks b ON r.run_id = b.run_id
+                {where_clause}
+                ORDER BY r.created_at DESC
+                LIMIT ? OFFSET ?
+            """
+            cursor.execute(query, params + [limit, offset])
+            rows = cursor.fetchall()
+            runs = []
+            for row in rows:
+                item = dict(row)
+                item["raw_records"] = json.loads(item["raw_records_json"])
+                del item["raw_records_json"]
+                runs.append(item)
+            return runs, total
+
     def get_run_by_id(self, run_id: str) -> Optional[Dict[str, Any]]:
         with self._connection() as conn:
             cursor = conn.cursor()

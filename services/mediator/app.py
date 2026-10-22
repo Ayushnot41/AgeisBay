@@ -120,6 +120,45 @@ async def get_runs(limit: int = Query(default=50, ge=1, le=500)):
     return ledger.get_runs(limit=limit)
 
 
+@app.get("/api/runs/paged")
+async def get_paged_runs(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    search: Optional[str] = None,
+    status: Optional[str] = None,
+    mode: Optional[str] = None,
+    fault_class: Optional[str] = None
+):
+    offset = (page - 1) * page_size
+    items, total = ledger.get_paged_runs(
+        limit=page_size,
+        offset=offset,
+        search=search,
+        status=status,
+        mode=mode,
+        fault_class=fault_class
+    )
+    total_pages = (total + page_size - 1) // page_size if total > 0 else 1
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": total_pages
+    }
+
+
+@app.get("/api/runs/export/checkpoint")
+async def export_checkpoint():
+    path = ledger.export_checkpoint()
+    with open(path, "r", encoding="utf-8") as f:
+        data = f.read()
+    from fastapi.responses import Response
+    return Response(content=data, media_type="application/json", headers={
+        "Content-Disposition": "attachment; filename=aegisbay_audit_checkpoint.json"
+    })
+
+
 @app.get("/api/runs/{run_id}")
 async def get_run_detail(run_id: str):
     run = ledger.get_run_by_id(run_id)
