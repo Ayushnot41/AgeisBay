@@ -1,0 +1,15 @@
+{
+  "name": "aegisbay",
+  "domain": "aegisbay",
+  "description": "Evidence-Gated AI Safety Testing & Blinded Zero-Trust Evaluation Enclave (Hack in Hills '26 Track 04)",
+  "repo": "https://github.com/Ayushnot41/AgeisBay",
+  "owner": {
+    "username": "Ayushnot41",
+    "email": "ayushsarkarfkt@gmail.com"
+  },
+  "record": {
+    "CNAME": "cname.vercel-dns.com",
+    "URL": "https://pickup-collecting-improved-florist.trycloudflare.com"
+  },
+  "proxied": true
+}

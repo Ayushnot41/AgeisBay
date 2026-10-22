@@ -2,9 +2,10 @@ import "./patch-readlink.js";
 import type { NextConfig } from "next";
 import path from "path";
 
+const __dirname = import.meta.dirname;
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  outputFileTracingRoot: __dirname,
   webpack: (config) => {
     config.resolve.symlinks = false;
     config.resolve.alias = {

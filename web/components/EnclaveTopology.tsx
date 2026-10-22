@@ -89,20 +89,25 @@ export default function EnclaveTopology({
         </p>
       </div>
       <div className="check-list">
-        {checks.map(([label, key]) => (
+        {checks.map(([label, key]) => {
+          const val = selectedRun
+            ? (selectedRun as Record<string, unknown>)[key]
+            : undefined;
+          return (
           <div key={key} className="check-item">
             <span>{label}</span>
             <strong>
               {selectedRun
-                ? selectedRun[key] === 1
+                ? val === 1
                   ? "Pass"
-                  : selectedRun[key] === 0
+                  : val === 0
                     ? "Failed"
                     : "Unknown"
                 : "Awaiting run"}
             </strong>
           </div>
-        ))}
+          );
+        })}
       </div>
       <div className="panel-footer">
         <span>

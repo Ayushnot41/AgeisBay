@@ -59,3 +59,5 @@ data/keys/private_key.pem
 # Frontend source must not match the Python lib/ exclusion.
 !/web/lib/
 !/web/lib/**
+
+*.tsbuildinfo

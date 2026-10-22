@@ -214,7 +214,7 @@ async def trigger_paired_experiments():
         "FAULT_06_TELEMETRY_DROP"
     ]
 
-    exp_id = f"paired_{int(asyncio.get_event_loop().time() * 1000)}"
+    exp_id = f"paired_{int(asyncio.get_running_loop().time() * 1000)}"
     baseline_runs = []
     hardened_runs = []
 
