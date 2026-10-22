@@ -52,7 +52,7 @@
 
 ---
 
-## What is AegisBay? (Explain Like I'm 5)
+## What is AegisBay?
 
 Imagine a high-school final exam.
 In normal schools, the teacher sits in the room, hands out the exam, and grades it honestly.
