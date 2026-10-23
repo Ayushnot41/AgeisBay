@@ -75,13 +75,13 @@ export default function SealLeaderboard() {
   const getTierBadge = (tier: string) => {
     switch (tier) {
       case "PLATINUM":
-        return "bg-cyan-500/20 text-cyan-300 border-cyan-500/40";
+        return "bg-accent/20 text-accent border-accent/40";
       case "GOLD":
-        return "bg-amber-500/20 text-amber-300 border-amber-500/40";
+        return "bg-status-warn/20 text-status-warn border-status-warn/40";
       case "SILVER":
-        return "bg-slate-400/20 text-slate-300 border-slate-400/40";
+        return "bg-card-elevated/20 text-body border-hairline-light/40";
       default:
-        return "bg-red-500/20 text-red-300 border-red-500/40";
+        return "bg-status-fail/20 text-status-fail border-status-fail/40";
     }
   };
 
@@ -112,14 +112,14 @@ export default function SealLeaderboard() {
       <div className="rounded-2xl border border-hairline-light bg-panel p-6 shadow-card">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-status-cyan/30 bg-status-cyan/10 px-3 py-0.5 text-xs font-mono text-status-cyan">
+            <div className="inline-flex items-center gap-2 rounded-full border border-status-cyan/30 bg-status-cyan/10 px-3 py-0.5 text-xs font-sans text-status-cyan">
               <Trophy className="h-3.5 w-3.5" />
-              <span>SCALE AI SEAL EVALUATION PROTOCOL</span>
+              <span>SEAL evaluation protocol</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-100">
-              Frontier Model Safety & SEAL Attestation Leaderboard
+            <h2 className="text-xl sm:text-2xl font-bold text-ink">
+              Model safety & SEAL attestations
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+            <p className="text-sm text-muted max-w-2xl">
               Blinded adversarial evaluations conducted inside the AegisBay zero-trust enclave.
               Models are evaluated against multi-vector jailbreaks, canary extraction probes, and
               side-channel timing variance.
@@ -130,7 +130,7 @@ export default function SealLeaderboard() {
             <button
               onClick={loadLeaderboard}
               disabled={loading}
-              className="flex items-center gap-1.5 rounded-xl border border-hairline bg-card px-3.5 py-2 text-xs font-medium text-slate-300 hover:text-slate-100 hover:bg-card-elevated transition-all"
+              className="flex items-center gap-1.5 rounded-xl border border-hairline bg-card px-3.5 py-2 text-xs font-medium text-body hover:text-ink hover:bg-card-elevated transition-all"
             >
               <RotateCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
               <span>Refresh Ranks</span>
@@ -141,7 +141,7 @@ export default function SealLeaderboard() {
         {/* Filters Bar */}
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-hairline/80 pt-4 text-xs">
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-slate-400 font-medium">Tier:</span>
+            <span className="text-muted font-medium">Tier:</span>
             {["ALL", "PLATINUM", "GOLD", "VULNERABLE"].map((tier) => (
               <button
                 key={tier}
@@ -149,7 +149,7 @@ export default function SealLeaderboard() {
                 className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
                   tierFilter === tier
                     ? "bg-status-cyan/20 text-status-cyan border border-status-cyan/40"
-                    : "text-slate-400 hover:text-slate-200"
+                    : "text-muted hover:text-ink"
                 }`}
               >
                 {tier}
@@ -158,13 +158,13 @@ export default function SealLeaderboard() {
           </div>
 
           <div className="relative w-full sm:w-64">
-            <Search className="pointer-events-none absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-500" />
+            <Search className="pointer-events-none absolute left-3 top-2.5 h-3.5 w-3.5 text-muted" />
             <input
               type="text"
               placeholder="Search model or vendor..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-xl border border-hairline bg-card py-1.5 pl-8 pr-3 text-xs text-slate-200 placeholder-slate-500 focus:border-status-cyan focus:outline-none"
+              className="w-full rounded-xl border border-hairline bg-card py-1.5 pl-8 pr-3 text-xs text-ink placeholder-muted focus:border-status-cyan focus:outline-none"
             />
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function SealLeaderboard() {
         <div className="lg:col-span-7 rounded-2xl border border-hairline bg-panel overflow-hidden shadow-card">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-sans">
-              <thead className="bg-canvas-deep/80 border-b border-hairline text-[11px] font-mono uppercase tracking-wider text-slate-400">
+              <thead className="bg-canvas-deep/80 border-b border-hairline text-xs font-sans tracking-normal text-muted">
                 <tr>
                   <th className="py-3 pl-4 pr-2">Rank</th>
                   <th className="py-3 px-3">Model & Vendor</th>
@@ -199,21 +199,21 @@ export default function SealLeaderboard() {
                           : "hover:bg-card-elevated/60"
                       }`}
                     >
-                      <td className="py-3.5 pl-4 pr-2 font-mono font-bold text-slate-300">
+                      <td className="py-3.5 pl-4 pr-2 font-sans font-bold text-body">
                         <div className="flex items-center gap-1.5">
                           {m.rank === 1 && (
-                            <Award className="h-4 w-4 text-amber-400 shrink-0" />
+                            <Award className="h-4 w-4 text-status-warn shrink-0" />
                           )}
                           <span>#{m.rank}</span>
                         </div>
                       </td>
                       <td className="py-3.5 px-3">
-                        <div className="font-semibold text-slate-100">{m.name}</div>
-                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                        <div className="font-semibold text-ink">{m.name}</div>
+                        <div className="flex items-center gap-2 text-xs text-muted font-sans">
                           <span>{m.vendor}</span>
                           <span>•</span>
                           <span
-                            className={`rounded px-1.5 py-0.2 border text-[9px] font-bold ${getTierBadge(
+                            className={`rounded px-1.5 py-0.2 border text-xs font-bold ${getTierBadge(
                               m.tier
                             )}`}
                           >
@@ -221,28 +221,28 @@ export default function SealLeaderboard() {
                           </span>
                         </div>
                       </td>
-                      <td className="py-3.5 px-3 text-center font-mono font-bold">
+                      <td className="py-3.5 px-3 text-center font-sans font-bold">
                         <span
                           className={
                             m.overall_safety_rating >= 95
-                              ? "text-emerald-400"
+                              ? "text-status-pass"
                               : m.overall_safety_rating >= 80
-                              ? "text-amber-400"
-                              : "text-red-400"
+                              ? "text-status-warn"
+                              : "text-status-fail"
                           }
                         >
                           {m.overall_safety_rating.toFixed(1)}%
                         </span>
                       </td>
-                      <td className="py-3.5 px-3 text-center font-mono text-slate-300">
+                      <td className="py-3.5 px-3 text-center font-sans text-body">
                         {m.jailbreak_resistance.toFixed(1)}%
                       </td>
-                      <td className="py-3.5 px-3 text-center font-mono">
+                      <td className="py-3.5 px-3 text-center font-sans">
                         <span
                           className={
                             m.side_channel_timing_auc === 0.5
                               ? "text-status-cyan"
-                              : "text-red-400"
+                              : "text-status-fail"
                           }
                         >
                           {m.side_channel_timing_auc.toFixed(2)}
@@ -250,10 +250,10 @@ export default function SealLeaderboard() {
                       </td>
                       <td className="py-3.5 pr-4 pl-2 text-right">
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-mono border ${
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-sans border ${
                             m.status === "ATTESTED"
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                              : "bg-red-500/10 text-red-400 border-red-500/30"
+                              ? "bg-status-pass/10 text-status-pass border-status-pass/30"
+                              : "bg-status-fail/10 text-status-fail border-status-fail/30"
                           }`}
                         >
                           <ShieldCheck className="h-3 w-3" />
@@ -273,47 +273,47 @@ export default function SealLeaderboard() {
           <div className="flex items-center justify-between border-b border-hairline/80 pb-3">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-status-cyan" />
-              <h3 className="text-xs font-mono uppercase tracking-wider text-slate-200">
+              <h3 className="text-xs font-sans tracking-normal text-ink">
                 SEAL Attestation Certificate
               </h3>
             </div>
-            <span className="text-[10px] font-mono text-slate-400">ED25519 VERIFIED</span>
+            <span className="text-xs font-sans text-muted">ED25519 VERIFIED</span>
           </div>
 
           {certLoading ? (
-            <div className="py-12 text-center text-xs text-slate-400 flex flex-col items-center gap-2">
+            <div className="py-12 text-center text-xs text-muted flex flex-col items-center gap-2">
               <RotateCw className="h-5 w-5 animate-spin text-status-cyan" />
               <span>Generating cryptographic attestation receipt...</span>
             </div>
           ) : certificate ? (
-            <div className="space-y-4 font-mono text-xs">
+            <div className="space-y-4 font-sans text-xs">
               <div className="rounded-xl border border-status-cyan/30 bg-canvas-deep p-4 space-y-2.5">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">Certificate ID:</span>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted">Certificate ID:</span>
                   <span className="text-status-cyan font-bold">
                     {certificate.certificate_id}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">Target Model:</span>
-                  <span className="text-slate-200 font-semibold">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted">Target Model:</span>
+                  <span className="text-ink font-semibold">
                     {certificate.model.name}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">Model Digest:</span>
-                  <span className="text-purple-400 truncate max-w-[180px]">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted">Model Digest:</span>
+                  <span className="text-accent truncate max-w-[180px]">
                     {certificate.model.model_digest}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">Enclave Notary:</span>
-                  <span className="text-emerald-400 truncate max-w-[180px]">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted">Enclave Notary:</span>
+                  <span className="text-status-pass truncate max-w-[180px]">
                     {certificate.enclave_attestation.notary_fingerprint}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">Audit Status:</span>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted">Audit Status:</span>
                   <span className="text-status-pass font-bold">
                     {certificate.enclave_attestation.audit_trail_status}
                   </span>
@@ -321,28 +321,28 @@ export default function SealLeaderboard() {
               </div>
 
               {/* Metrics Breakdown */}
-              <div className="grid grid-cols-2 gap-2 text-[11px]">
+              <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="rounded-lg border border-hairline bg-panel p-2.5">
-                  <div className="text-[10px] text-slate-400">Overall Safety</div>
-                  <div className="text-base font-bold text-emerald-400">
+                  <div className="text-xs text-muted">Overall Safety</div>
+                  <div className="text-base font-bold text-status-pass">
                     {certificate.evaluation_scores.overall_safety_rating}%
                   </div>
                 </div>
                 <div className="rounded-lg border border-hairline bg-panel p-2.5">
-                  <div className="text-[10px] text-slate-400">Jailbreak Immunity</div>
-                  <div className="text-base font-bold text-cyan-400">
+                  <div className="text-xs text-muted">Jailbreak Immunity</div>
+                  <div className="text-base font-bold text-accent">
                     {certificate.evaluation_scores.jailbreak_resistance_pct}%
                   </div>
                 </div>
                 <div className="rounded-lg border border-hairline bg-panel p-2.5">
-                  <div className="text-[10px] text-slate-400">Canary Immunity</div>
-                  <div className="text-base font-bold text-purple-400">
+                  <div className="text-xs text-muted">Canary Immunity</div>
+                  <div className="text-base font-bold text-accent">
                     {certificate.evaluation_scores.canary_leakage_immunity_pct}%
                   </div>
                 </div>
                 <div className="rounded-lg border border-hairline bg-panel p-2.5">
-                  <div className="text-[10px] text-slate-400">Side-Channel AUC</div>
-                  <div className="text-base font-bold text-slate-100">
+                  <div className="text-xs text-muted">Side-Channel AUC</div>
+                  <div className="text-base font-bold text-ink">
                     {certificate.evaluation_scores.side_channel_timing_auc.toFixed(2)}
                   </div>
                 </div>
@@ -352,7 +352,7 @@ export default function SealLeaderboard() {
               <div className="flex flex-col sm:flex-row gap-2 pt-2">
                 <button
                   onClick={downloadCertJson}
-                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-hairline bg-panel py-2 text-xs font-semibold text-slate-200 hover:bg-card-elevated hover:border-slate-400 transition-all"
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-hairline bg-panel py-2 text-xs font-semibold text-ink hover:bg-card-elevated hover:border-hairline-light transition-all"
                 >
                   <Download className="h-3.5 w-3.5" />
                   <span>Download JSON Cert</span>
@@ -363,7 +363,7 @@ export default function SealLeaderboard() {
                 >
                   {copiedBadge ? (
                     <>
-                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      <Check className="h-3.5 w-3.5 text-status-pass" />
                       <span>Copied Badge!</span>
                     </>
                   ) : (
@@ -376,7 +376,7 @@ export default function SealLeaderboard() {
               </div>
             </div>
           ) : (
-            <div className="py-8 text-center text-xs text-slate-400">
+            <div className="py-8 text-center text-xs text-muted">
               Select a model from the leaderboard to view its attestation certificate.
             </div>
           )}

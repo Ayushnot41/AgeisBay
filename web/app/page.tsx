@@ -25,6 +25,8 @@ import LakeraGuardShield from "@/components/LakeraGuardShield";
 import EnclaveTopology from "@/components/EnclaveTopology";
 import PairedMatrixComparator from "@/components/PairedMatrixComparator";
 import AuthModal from "@/components/AuthModal";
+import LandingPage from "@/components/LandingPage";
+import { ThemeSelect } from "@/components/ThemeProvider";
 import { CopyButton, ErrorNotice, Panel, Status } from "@/components/WorkbenchUI";
 import {
   Database,
@@ -90,14 +92,7 @@ function RecentRunsCard({
               onClick={() => onSelectRun(run)}
               aria-label={`Open ${faultLabel(run.fault_class)} receipt, status ${run.status}`}
             >
-              <span className="recent-run-mark" aria-hidden="true">
-                <img
-                  src="/aegisbay/run-status-mark.svg"
-                  alt=""
-                  width={7}
-                  height={7}
-                />
-              </span>
+              <span className={`recent-run-mark${run.status === "INVALID" ? " is-invalid" : ""}`} aria-hidden="true" />
               <span className="recent-run-copy">
                 <span className="recent-run-title">
                   {faultLabel(run.fault_class)}
@@ -131,6 +126,7 @@ export default function SecOpsWorkbench() {
   const { user, isAuthenticated, logout } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("console");
+  const [showLanding, setShowLanding] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState<TelemetryStats | null>(null);
   const [runs, setRuns] = useState<EvaluationRun[]>([]);
@@ -144,6 +140,34 @@ export default function SecOpsWorkbench() {
   const [error, setError] = useState<string | null>(null);
   const [sync, setSync] = useState("");
   const pending = useRef<Promise<void> | null>(null);
+
+  useEffect(() => {
+    const syncView = () => {
+      const view = window.location.hash.slice(1);
+      if (["console", "ledger", "ablation", "redteam", "guard", "sentinel", "topology", "leaderboard"].includes(view)) {
+        setActiveTab(view as TabId);
+        setShowLanding(false);
+      } else {
+        setShowLanding(true);
+      }
+      setSidebarOpen(false);
+    };
+    syncView();
+    window.addEventListener("hashchange", syncView);
+    return () => window.removeEventListener("hashchange", syncView);
+  }, []);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSidebarOpen(false);
+        document.querySelector<HTMLButtonElement>(".aegis-mobile-menu")?.focus();
+      }
+    };
+    document.addEventListener("keydown", close);
+    return () => document.removeEventListener("keydown", close);
+  }, [sidebarOpen]);
 
   const loadData = useCallback(() => {
     if (pending.current) return pending.current;
@@ -210,9 +234,9 @@ export default function SecOpsWorkbench() {
       "FAULT_06_TELEMETRY_DROP",
     ];
     setFault(
-      detected.recommended_fault_class &&
-        knownFaults.includes(detected.recommended_fault_class)
-        ? detected.recommended_fault_class
+      detected.target_enclave_check &&
+        knownFaults.includes(detected.target_enclave_check)
+        ? detected.target_enclave_check
         : "FAULT_01_NET_EGRESS",
     );
   }, []);
@@ -247,7 +271,10 @@ export default function SecOpsWorkbench() {
 
   function selectTab(id: TabId) {
     setActiveTab(id);
+    setShowLanding(false);
     setSidebarOpen(false);
+    window.location.hash = id;
+    window.scrollTo({ top: 0, behavior: "instant" });
     requestAnimationFrame(() => {
       document.getElementById("workspace")?.focus({ preventScroll: true });
     });
@@ -258,10 +285,28 @@ export default function SecOpsWorkbench() {
     selectTab("ledger");
   }
 
+  if (showLanding) {
+    return (
+      <MotionConfig reducedMotion="user">
+        <LandingPage
+          onLaunchConsole={() => selectTab("console")}
+          onOpenLedger={() => selectTab("ledger")}
+          onOpenAblation={() => selectTab("ablation")}
+          onOpenLeaderboard={() => selectTab("leaderboard")}
+          onOpenRedTeam={() => selectTab("redteam")}
+          onOpenGuard={() => selectTab("guard")}
+          onSignIn={() => setAuthModalOpen(true)}
+          stats={stats}
+        />
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      </MotionConfig>
+    );
+  }
+
   return (
     <MotionConfig reducedMotion="user">
       <div className="aegis-app">
-        <a href="#workspace" className="skip-link">
+        <a href="#workspace" className="skip-link" onClick={(event) => { event.preventDefault(); document.getElementById("workspace")?.focus(); }}>
           Skip to workspace
         </a>
 
@@ -269,7 +314,7 @@ export default function SecOpsWorkbench() {
           className={`aegis-sidebar${sidebarOpen ? " is-open" : ""}`}
           aria-label="AegisBay navigation"
         >
-          <button className="aegis-brand" onClick={() => selectTab("console")}>
+          <button className="aegis-brand" aria-label="AegisBay home" onClick={() => { setShowLanding(true); window.location.hash = "home"; window.scrollTo({ top: 0, behavior: "instant" }); }}>
             <span className="aegis-brand-mark">A</span>
             <span className="aegis-brand-copy">
               <strong>AegisBay</strong>
@@ -305,14 +350,7 @@ export default function SecOpsWorkbench() {
           </nav>
 
           <div className="aegis-sidebar-status">
-            <span className={`connection-dot${error ? " is-offline" : ""}`}>
-              <img
-                src="/aegisbay/connection-indicator.svg"
-                alt=""
-                width={7}
-                height={7}
-              />
-            </span>
+            <span className={`connection-dot${error ? " is-offline" : ""}`} aria-hidden="true" />
             <span className="sidebar-status-copy">
               <strong>{error ? "Mediator offline" : "Mediator connected"}</strong>
               <small>Simulated worker</small>
@@ -340,7 +378,7 @@ export default function SecOpsWorkbench() {
                 {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
               <span className="aegis-breadcrumb">
-                <span>AEGISBAY</span>
+                <span>AegisBay</span>
                 <span aria-hidden="true">/</span>
                 <strong>{selectedTab.label}</strong>
               </span>
@@ -348,15 +386,11 @@ export default function SecOpsWorkbench() {
 
             <div className="aegis-topbar-actions">
               <div className={`aegis-connection${error ? " is-offline" : ""}`} role="status">
-                <img
-                  src="/aegisbay/connection-indicator.svg"
-                  alt=""
-                  width={7}
-                  height={7}
-                />
+                <span className="connection-indicator" aria-hidden="true" />
                 <span>{connectionLabel}</span>
                 <small>{sync ? `Synced ${sync}` : ""}</small>
               </div>
+              <ThemeSelect />
               <button
                 className="button aegis-refresh"
                 onClick={() => void loadData()}
@@ -386,7 +420,7 @@ export default function SecOpsWorkbench() {
                   </button>
                 </div>
               ) : (
-                <button className="text-action aegis-sign-in" onClick={() => setAuthModalOpen(true)}>
+                <button className="text-action aegis-sign-in" aria-label="Sign in" onClick={() => setAuthModalOpen(true)}>
                   <UserIcon size={15} />
                   <span>Sign in</span>
                 </button>
@@ -424,8 +458,8 @@ export default function SecOpsWorkbench() {
               <span className="ledger-summary-count">
                 {stats ? `${stats.total_runs} signed receipts` : "Loading receipts"}
               </span>
-              <img src="/aegisbay/divider.svg" alt="" width={4} height={4} />
-              <span className="ledger-summary-state">
+              <span className="ledger-summary-dot" aria-hidden="true" />
+              <span className="ledger-summary-state" data-state={stats?.ledger_verification}>
                 {stats?.ledger_verification === "VERIFIED"
                   ? "Ledger verified"
                   : stats?.ledger_verification === "TAMPER_DETECTED"
@@ -476,7 +510,6 @@ export default function SecOpsWorkbench() {
             )}
             {activeTab === "ledger" && (
               <EvidenceLedgerView
-                runs={runs}
                 selectedRun={selected}
                 onSelectRun={setSelected}
                 onTamperToggled={loadData}

@@ -1,44 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ShieldCheck, LockKeyhole, FileCheck2, Radio, Database, Layers, Cpu, ArrowUpRight, Menu, X, LogOut, Play, LoaderCircle, Plus, Smartphone, Laptop, Monitor } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import {
-  ShieldCheck,
-  Lock,
-  Cpu,
-  Activity,
-  CheckCircle2,
-  AlertTriangle,
-  ArrowRight,
-  Database,
-  Radio,
-  FileCheck2,
-  Terminal,
-  ExternalLink,
-  Layers,
-  Sparkles,
-  Smartphone,
-  Laptop,
-  Monitor,
-  Menu,
-  X,
-  User as UserIcon,
-  LogOut,
-  ChevronRight,
-  Play,
-  RotateCw,
-  Trophy,
-  Zap,
-  ShieldAlert,
-  Award,
-} from "lucide-react";
-import {
-  TelemetryStats,
-  dispatchRun,
-  getSealLeaderboard,
-  ModelLeaderboardEntry,
-  API_BASE,
-} from "@/lib/api";
+import { dispatchRun, getSealLeaderboard, type TelemetryStats, type ModelLeaderboardEntry, type EvaluationRun } from "@/lib/api";
+import { ThemeSelect } from "./ThemeProvider";
+import { ErrorNotice, Status } from "./WorkbenchUI";
+import "../app/landing.css";
 
 interface LandingPageProps {
   onLaunchConsole: () => void;
@@ -47,41 +15,98 @@ interface LandingPageProps {
   onOpenLeaderboard?: () => void;
   onOpenRedTeam?: () => void;
   onOpenGuard?: () => void;
+  onSignIn: () => void;
   stats: TelemetryStats | null;
 }
 
-export default function LandingPage({
-  onLaunchConsole,
-  onOpenLedger,
-  onOpenAblation,
-  onOpenLeaderboard,
-  onOpenRedTeam,
-  onOpenGuard,
-  stats,
-}: LandingPageProps) {
-  const { user, isAuthenticated, logout, loginDemo } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [leaderboardPreview, setLeaderboardPreview] = useState<ModelLeaderboardEntry[]>([]);
+const features = [
+  { icon: LockKeyhole, title: "Blinded evaluation", body: "Keep test inputs separate until commitments are frozen. Inspect isolation checks alongside each result." },
+  { icon: FileCheck2, title: "Commit before you reveal", body: "Bind the prompt and policy to SHA-256 commitments before the evaluation begins." },
+  { icon: Radio, title: "Timing controls", body: "Compare raw and padded release times to inspect the timing side channel." },
+  { icon: Cpu, title: "Network sentinel", body: "Explore egress probes and canary checks, then load a selected threat into the evaluation workspace." },
+  { icon: Database, title: "An inspectable audit trail", body: "Trace configuration, checks, results, and status through a four-leaf Merkle tree and an Ed25519 signature." },
+  { icon: Layers, title: "Evidence-gated scoring", body: "Compare baseline and hardened runs. See which faults make a result ineligible to contribute to the score." },
+];
 
-  // Interactive Live Sandbox state on Landing Page
-  const [sandboxPrompt, setSandboxPrompt] = useState(
-    "Verify policy boundaries: inspect prompt injection immunity under blinded isolation."
+const faqs = [
+  { question: "How are the inputs protected from changes?", answer: "AegisBay records the prompt and policy commitments before evaluation. The signed receipt links the committed configuration to the resulting checks and score, so you can inspect what was evaluated." },
+  { question: "What happens if a record is changed afterward?", answer: "The evidence ledger recalculates the Merkle root and verifies its signature. A changed record can no longer match its signed receipt and is flagged as tampered." },
+  { question: "What do the timing controls demonstrate?", answer: "The paired experiments compare raw and padded release times. The current workers are synthetic, so these results demonstrate the evaluation and audit process rather than measured model security." },
+];
+
+function ProtocolIllustration() {
+  return (
+    <figure className="protocol-figure">
+      <div className="protocol-figure-heading"><span>Evaluation protocol</span><span>Illustration</span></div>
+      <div className="protocol-drawing" aria-hidden="true">
+        <svg viewBox="0 0 460 340" fill="none">
+          <path className="protocol-guide" d="M30 240 230 340 430 240M30 190 230 290 430 190M30 140 230 240 430 140M80 75 80 290M230 0 230 340M380 75 380 290" />
+          <g className="protocol-layer protocol-layer-evidence">
+            <path d="m55 214 175-87 175 87v16l-175 87-175-87z" className="protocol-edge" />
+            <path d="m55 214 175-87 175 87-175 87z" className="protocol-plane" />
+            <path d="m146 218 84 42 83-42M230 260v22" className="protocol-trace" />
+          </g>
+          <g className="protocol-layer protocol-layer-seal">
+            <path d="m55 148 175-87 175 87v16l-175 87-175-87z" className="protocol-edge" />
+            <path d="m55 148 175-87 175 87-175 87z" className="protocol-plane" />
+            <path d="m182 149 48-24 48 24-48 24z" className="protocol-chip" />
+            <path d="m211 148 14 7 25-14" className="protocol-check" />
+          </g>
+          <g className="protocol-layer protocol-layer-commit">
+            <path d="m55 82 175-70 175 70v16l-175 87L55 98z" className="protocol-edge" />
+            <path d="m55 82 175-70 175 70-175 87z" className="protocol-plane" />
+            <path d="m141 83 63 31m-40-44 64 31m-39-43 64 31m-39-44 64 31m-40-43 64 31" className="protocol-hashes" />
+          </g>
+          <path d="M230 169v28m0 37v27" className="protocol-connector" />
+          <circle cx="230" cy="197" r="4" className="protocol-point" />
+          <circle cx="230" cy="261" r="4" className="protocol-point" />
+        </svg>
+      </div>
+      <figcaption className="protocol-stages">
+        <span><span>01</span><strong>Commit</strong></span>
+        <span><span>02</span><strong>Seal</strong></span>
+        <span><span>03</span><strong>Verify</strong></span>
+      </figcaption>
+    </figure>
   );
+}
+
+export default function LandingPage({
+  onLaunchConsole, onOpenLedger, onOpenAblation, onOpenLeaderboard, onOpenRedTeam, onOpenGuard, onSignIn, stats,
+}: LandingPageProps) {
+  const { user, isAuthenticated, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [models, setModels] = useState<ModelLeaderboardEntry[]>([]);
+  const [sandboxPrompt, setSandboxPrompt] = useState("Verify policy boundaries: inspect prompt injection immunity under blinded isolation.");
   const [sandboxFault, setSandboxFault] = useState("CLEAN");
   const [sandboxLoading, setSandboxLoading] = useState(false);
-  const [sandboxResult, setSandboxResult] = useState<any | null>(null);
+  const [sandboxResult, setSandboxResult] = useState<EvaluationRun | null>(null);
+  const [sandboxError, setSandboxError] = useState<string | null>(null);
 
   useEffect(() => {
-    getSealLeaderboard()
-      .then((data) => setLeaderboardPreview(data.slice(0, 4)))
-      .catch(() => {});
+    getSealLeaderboard().then((data) => setModels(data.slice(0, 4))).catch(() => {});
   }, []);
 
-  const handleSandboxDispatch = async () => {
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        document.getElementById("landing-menu-toggle")?.focus();
+      }
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [menuOpen]);
+
+  async function handleSandboxDispatch(event: React.FormEvent) {
+    event.preventDefault();
+    if (sandboxLoading || !sandboxPrompt.trim()) return;
     setSandboxLoading(true);
     setSandboxResult(null);
+    setSandboxError(null);
     try {
-      const res = await dispatchRun({
+      const result = await dispatchRun({
         prompt: sandboxPrompt,
         policy: "POLICY_STRICT_DENY: Enforce adversarial injection boundaries.",
         model_id: "llama-3.2-1b-instruct",
@@ -89,877 +114,177 @@ export default function LandingPage({
         fault_class: sandboxFault,
         experiment_id: `sandbox_${Date.now()}`,
       });
-      setSandboxResult(res);
+      setSandboxResult(result.run_data);
     } catch {
-      // Fallback synthetic preview if offline
-      setSandboxResult({
-        run_data: {
-          run_id: `run_sim_${Date.now()}`,
-          status: sandboxFault === "CLEAN" ? "ELIGIBLE" : "INVALID",
-          mode: "HARDENED",
-          fault_class: sandboxFault,
-          merkle_root: "9c3e41b2f8a1...d402",
-          ed25519_signature: "7f4a9b0c...e812",
-          score_contributed: sandboxFault === "CLEAN" ? 1.0 : 0.0,
-        },
-      });
+      setSandboxError("The evaluation could not be confirmed. Open the evidence ledger before retrying to check whether it completed.");
     } finally {
       setSandboxLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-canvas text-slate-100 flex flex-col font-sans selection:bg-status-cyan selection:text-black">
-      {/* 1. TOP NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 w-full border-b border-hairline/80 bg-canvas-deep/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
-          {/* Logo & Identity */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-status-cyan/10 border border-status-cyan/40 text-status-cyan shadow-glowCyan">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-base font-bold tracking-wider text-slate-100">
-                  AEGISBAY
-                </span>
-                <span className="hidden sm:inline-flex rounded-full bg-status-cyan/10 border border-status-cyan/30 px-2 py-0.5 text-[10px] font-mono text-status-cyan">
-                  Track 04: Bayora
-                </span>
-              </div>
-              <p className="text-[10px] font-mono text-slate-400 hidden sm:block">
-                Zero-Trust Evaluation Enclave
-              </p>
-            </div>
-          </div>
-
-          {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-300">
-            {onOpenLeaderboard && (
-              <button
-                onClick={onOpenLeaderboard}
-                className="flex items-center gap-1.5 hover:text-status-cyan transition-colors"
-              >
-                <Trophy className="h-3.5 w-3.5 text-amber-400" />
-                <span>SEAL Leaderboard</span>
-              </button>
-            )}
-            {onOpenRedTeam && (
-              <button
-                onClick={onOpenRedTeam}
-                className="flex items-center gap-1.5 hover:text-status-cyan transition-colors"
-              >
-                <Zap className="h-3.5 w-3.5 text-purple-400" />
-                <span>Red Team</span>
-              </button>
-            )}
-            {onOpenGuard && (
-              <button
-                onClick={onOpenGuard}
-                className="flex items-center gap-1.5 hover:text-status-cyan transition-colors"
-              >
-                <ShieldAlert className="h-3.5 w-3.5 text-blue-400" />
-                <span>Lakera Shield</span>
-              </button>
-            )}
-            <a href="#features" className="hover:text-status-cyan transition-colors">
-              Pillars
-            </a>
-            <button
-              onClick={onOpenLedger}
-              className="hover:text-status-cyan transition-colors"
-            >
-              Merkle Ledger
-            </button>
-            <button
-              onClick={onOpenAblation}
-              className="hover:text-status-cyan transition-colors"
-            >
-              Ablation
-            </button>
-            <a href="#faq" className="hover:text-status-cyan transition-colors">
-              FAQ
-            </a>
+    <div id="home" className="landing-page">
+      <a href="#landing-main" className="skip-link">Skip to content</a>
+      <header className="landing-header">
+        <div className="landing-header-inner">
+          <a className="landing-brand" href="#home" aria-label="AegisBay home">
+            <span className="aegis-brand-mark">A</span><span>AegisBay</span>
+          </a>
+          <nav className="landing-nav" aria-label="Main navigation">
+            <a href="#features">How it works</a>
+            <a href="#sandbox">Try an evaluation</a>
+            <a href="#faq">FAQ</a>
           </nav>
-
-          {/* Actions & Auth */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="landing-header-actions">
+            <ThemeSelect />
             {isAuthenticated && user ? (
-              <div className="flex items-center gap-2 rounded-xl border border-hairline-light bg-card px-3 py-1.5 text-xs">
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="h-6 w-6 rounded-full border border-status-cyan/40 object-cover"
-                  />
-                ) : (
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-status-cyan/20 text-status-cyan">
-                    <UserIcon className="h-3.5 w-3.5" />
-                  </div>
-                )}
-                <div className="text-left">
-                  <div className="font-semibold text-slate-200 leading-tight">
-                    {user.name.split(" ")[0]}
-                  </div>
-                  <div className="text-[10px] font-mono text-status-cyan leading-none">
-                    {user.role}
-                  </div>
-                </div>
-                <button
-                  onClick={logout}
-                  title="Sign Out"
-                  className="ml-2 text-slate-400 hover:text-red-400 transition-colors"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                </button>
-              </div>
+              <button className="text-action landing-auth" onClick={logout} aria-label="Sign out"><span>{user.name.split(" ")[0]}</span><LogOut size={16} /></button>
             ) : (
-              <button
-                onClick={() => loginDemo("Lead Auditor")}
-                className="rounded-xl border border-hairline-light bg-card px-3.5 py-2 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-card-elevated transition-all"
-              >
-                Sign In
-              </button>
+              <button className="text-action landing-auth" onClick={onSignIn}>Sign in</button>
             )}
-
-            <button
-              onClick={onLaunchConsole}
-              className="flex items-center gap-2 rounded-xl bg-status-cyan/20 border border-status-cyan/60 px-4 py-2 text-xs font-semibold text-status-cyan hover:bg-status-cyan/30 active:scale-95 transition-all shadow-glowCyan"
-            >
-              <span>Launch Console</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="flex sm:hidden items-center gap-2">
-            <button
-              onClick={onLaunchConsole}
-              className="rounded-lg bg-status-cyan/20 border border-status-cyan/50 px-3 py-1.5 text-xs font-semibold text-status-cyan"
-            >
-              Console
-            </button>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-lg p-2 text-slate-400 hover:bg-white/5 hover:text-slate-200"
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <button className="button button-primary landing-header-launch" onClick={onLaunchConsole}>Open workspace</button>
+            <button id="landing-menu-toggle" className="icon-button landing-menu-toggle" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="landing-mobile-nav" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
-
-        {/* Mobile Dropdown Drawer */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-b border-hairline bg-panel p-4 space-y-3 animate-in slide-in-from-top-2 duration-150">
-            <div className="grid grid-cols-2 gap-2 text-xs font-medium">
-              {onOpenLeaderboard && (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenLeaderboard();
-                  }}
-                  className="rounded-lg bg-card p-2 text-center text-amber-400 flex items-center justify-center gap-1.5"
-                >
-                  <Trophy className="h-3.5 w-3.5" />
-                  <span>SEAL Board</span>
-                </button>
-              )}
-              {onOpenRedTeam && (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenRedTeam();
-                  }}
-                  className="rounded-lg bg-card p-2 text-center text-purple-400 flex items-center justify-center gap-1.5"
-                >
-                  <Zap className="h-3.5 w-3.5" />
-                  <span>Red Team</span>
-                </button>
-              )}
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenLedger();
-                }}
-                className="rounded-lg bg-card p-2 text-center text-slate-200"
-              >
-                Merkle Ledger
-              </button>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenAblation();
-                }}
-                className="rounded-lg bg-card p-2 text-center text-slate-200"
-              >
-                Ablation
-              </button>
-            </div>
-
-            <div className="pt-2 border-t border-hairline flex flex-col gap-2">
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onLaunchConsole();
-                }}
-                className="w-full rounded-xl bg-status-cyan/20 border border-status-cyan/50 py-2.5 text-xs font-semibold text-status-cyan text-center"
-              >
-                Open SecOps Workbench
-              </button>
-            </div>
-          </div>
+        {menuOpen && (
+          <nav id="landing-mobile-nav" className="landing-mobile-nav" aria-label="Mobile navigation">
+            <a href="#features" onClick={() => setMenuOpen(false)}>How it works</a>
+            <a href="#sandbox" onClick={() => setMenuOpen(false)}>Try an evaluation</a>
+            <a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a>
+            {isAuthenticated ? <button onClick={logout}>Sign out</button> : <button onClick={onSignIn}>Sign in</button>}
+            <button onClick={onLaunchConsole}>Open workspace</button>
+          </nav>
         )}
       </header>
 
-      {/* 2. HERO SECTION */}
-      <section className="relative overflow-hidden pt-12 pb-20 sm:pt-20 sm:pb-28 border-b border-hairline/60 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(6,182,212,0.15),rgba(255,255,255,0))]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Column: Headlines & Value Prop */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              {/* Security Pill */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-status-cyan/40 bg-status-cyan/10 px-3.5 py-1 text-xs font-mono text-status-cyan">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-cyan opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-status-cyan"></span>
-                </span>
-                <span>ZERO-TRUST ENCLAVE • SCALE AI SEAL ATTENTION</span>
-              </div>
-
-              {/* Main Headline */}
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-100 leading-[1.1]">
-                Evidence-Gated AI Safety Testing in{" "}
-                <span className="bg-gradient-to-r from-status-cyan via-blue-400 to-emerald-400 bg-clip-text text-transparent">
-                  Blinded Enclaves
-                </span>
-              </h1>
-
-              {/* Subheadline */}
-              <p className="text-sm sm:text-base lg:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Eliminating benchmark gaming, evaluator collusion, and post-hoc result
-                tampering with hardware-isolated execution, cryptographic commit-reveal
-                protocols, and immutable Merkle audit ledgers.
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
-                <button
-                  onClick={onLaunchConsole}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-status-cyan text-black px-6 py-3.5 text-sm font-bold hover:bg-cyan-300 active:scale-[0.98] transition-all shadow-glowCyan"
-                >
-                  <span>Launch Operator Console</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-                {onOpenLeaderboard && (
-                  <button
-                    onClick={onOpenLeaderboard}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-5 py-3.5 text-sm font-semibold text-amber-300 hover:bg-amber-500/20 transition-all"
-                  >
-                    <Trophy className="h-4 w-4 text-amber-400" />
-                    <span>View SEAL Leaderboard</span>
-                  </button>
-                )}
-                {onOpenRedTeam && (
-                  <button
-                    onClick={onOpenRedTeam}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-hairline bg-card px-5 py-3.5 text-sm font-medium text-purple-300 hover:text-purple-200 transition-colors"
-                  >
-                    <Zap className="h-4 w-4 text-purple-400" />
-                    <span>Red Team Engine</span>
-                  </button>
-                )}
-              </div>
-
-              {/* Proof Badges */}
-              <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-mono text-slate-400 border-t border-hairline/60">
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-status-pass" />
-                  <span>Anthropic Constitutional Axioms</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-status-pass" />
-                  <span>Lakera Guard Threat Radar</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-status-pass" />
-                  <span>100% Tamper Intercept</span>
-                </div>
-              </div>
+      <main id="landing-main" tabIndex={-1}>
+        <section className="landing-hero landing-container">
+          <div className="landing-hero-copy">
+            <h1>AI safety testing.<br />Evidence at every step.</h1>
+            <p>Freeze the inputs. Run a controlled evaluation. Trace every result back to a signed receipt you can inspect.</p>
+            <div className="landing-hero-actions">
+              <button className="button button-primary" onClick={onLaunchConsole}>Open workspace <ArrowUpRight size={18} /></button>
+              <button className="button" onClick={onOpenLedger}>Explore the evidence</button>
             </div>
-
-            {/* Right Column: 3D Architecture Motion Hologram */}
-            <div className="lg:col-span-5 flex flex-col items-center">
-              <div className="relative w-full max-w-md rounded-2xl border border-hairline-light bg-card/60 p-4 shadow-card backdrop-blur-xl">
-                {/* Hologram Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-hairline/80 text-xs font-mono">
-                  <div className="flex items-center gap-2 text-status-cyan">
-                    <Activity className="h-4 w-4 animate-pulse" />
-                    <span>ENCLAVE ISOMETRIC STREAM</span>
-                  </div>
-                  <span className="text-[10px] text-slate-400">FPS: 60 • ZERO-TRUST</span>
-                </div>
-
-                {/* 3D Visual Asset */}
-                <div className="relative mt-3 aspect-video w-full overflow-hidden rounded-xl bg-canvas-deep border border-hairline flex items-center justify-center">
-                  <img
-                    src="docs/assets/aegisbay_3d_motion.gif"
-                    alt="AegisBay 3D Architecture Motion Graphic"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as any).style.display = "none";
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-canvas-deep via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[10px] font-mono text-slate-300">
-                    <span className="text-status-cyan">ED25519:8E:82:E7:93:D6</span>
-                    <span className="text-emerald-400">SEALED ENCLAVE ACTIVE</span>
-                  </div>
-                </div>
-
-                {/* Micro Telemetry Bar */}
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center font-mono">
-                  <div className="rounded-lg bg-panel p-2 border border-hairline">
-                    <div className="text-[10px] text-slate-400 uppercase">Runs Logged</div>
-                    <div className="text-sm font-bold text-slate-100">
-                      {stats ? stats.total_runs : "50+"}
-                    </div>
-                  </div>
-                  <div className="rounded-lg bg-panel p-2 border border-hairline">
-                    <div className="text-[10px] text-slate-400 uppercase">Tamper Rate</div>
-                    <div className="text-sm font-bold text-status-pass">100% Gated</div>
-                  </div>
-                  <div className="rounded-lg bg-panel p-2 border border-hairline">
-                    <div className="text-[10px] text-slate-400 uppercase">Timing AUC</div>
-                    <div className="text-sm font-bold text-status-cyan">0.50 (Zero Leak)</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <p className="landing-hero-note"><ShieldCheck size={17} /><span>Synthetic workers. Real cryptographic receipts.</span></p>
           </div>
+          <ProtocolIllustration />
+        </section>
+
+        <div className="landing-telemetry landing-container" aria-label="Evaluation telemetry">
+          <div><span>Recorded evaluations</span><strong>{stats ? stats.total_runs.toLocaleString() : "—"}</strong><small>Committed to the ledger</small></div>
+          <div><span>Ledger integrity</span><strong>{stats?.ledger_verification === "VERIFIED" ? "Verified" : stats?.ledger_verification === "EMPTY" ? "No receipts yet" : stats?.ledger_verification === "TAMPER_DETECTED" ? "Tamper detected" : "Awaiting data"}</strong><small>Merkle root verification</small></div>
+          <div><span>Timing analysis</span><strong>{stats?.timing_attack_auc != null ? stats.timing_attack_auc.toFixed(2) + " AUC" : "—"}</strong><small>From recorded evaluations</small></div>
+          <div><span>Notary key</span><strong className="landing-key">{stats?.enclave_public_key_fingerprint || "Awaiting mediator"}</strong><small>Ed25519 signing fingerprint</small></div>
         </div>
-      </section>
 
-      {/* 3. SCALE AI SEAL FRONTIER MODEL LEADERBOARD PREVIEW SECTION */}
-      {leaderboardPreview.length > 0 && (
-        <section id="leaderboard" className="py-16 border-b border-hairline/60 bg-panel/30">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-              <div>
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-xs font-mono text-amber-300 mb-2">
-                  <Trophy className="h-3.5 w-3.5" />
-                  <span>SCALE AI SEAL EVALUATION MATRIX</span>
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-slate-100">
-                  Frontier AI Model Safety Rankings
-                </h3>
-                <p className="mt-2 text-xs sm:text-sm text-slate-400 max-w-xl">
-                  Cryptographically verified safety ratings across leading foundation models.
-                  Tested under double-blinded zero-trust isolation against adversarial jailbreaks.
-                </p>
-              </div>
+        <section id="features" className="landing-section landing-container">
+          <div className="landing-section-heading">
+            <h2>A clear path from<br />test to evidence.</h2>
+            <p>The same audit trail connects every part of your evaluation. Follow it from frozen inputs to the final signed result.</p>
+          </div>
+          <div className="landing-features">
+            {features.map(({ icon: Icon, title, body }) => (
+              <article key={title}><Icon size={22} strokeWidth={1.6} /><h3>{title}</h3><p>{body}</p></article>
+            ))}
+          </div>
+          <div className="landing-tool-links">
+            {onOpenRedTeam && <button className="text-action" onClick={onOpenRedTeam}>Red-team probes <ArrowUpRight size={16} /></button>}
+            {onOpenGuard && <button className="text-action" onClick={onOpenGuard}>Policy guard <ArrowUpRight size={16} /></button>}
+            <button className="text-action" onClick={onOpenAblation}>Paired experiments <ArrowUpRight size={16} /></button>
+          </div>
+        </section>
 
-              {onOpenLeaderboard && (
-                <button
-                  onClick={onOpenLeaderboard}
-                  className="flex items-center gap-2 rounded-xl bg-amber-500/20 border border-amber-500/50 px-4 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-500/30 transition-all shadow-sm"
-                >
-                  <span>Inspect Full SEAL Leaderboard</span>
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              )}
+        <section id="sandbox" className="landing-sandbox-section">
+          <div className="landing-container landing-sandbox-layout">
+            <div className="landing-sandbox-copy">
+              <h2>See the audit<br />trail take shape.</h2>
+              <p>Send a prompt through a hardened evaluation, then inspect the signed receipt.</p>
+              <div className="landing-synthetic-note"><ShieldCheck size={19} /><p>Workers simulate tests and checks. Results demonstrate the audit flow, not model behaviour.</p></div>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {leaderboardPreview.map((model) => (
-                <div
-                  key={model.model_id}
-                  onClick={onOpenLeaderboard}
-                  className="rounded-2xl border border-hairline bg-card p-5 cursor-pointer hover:border-amber-500/50 hover:bg-card-elevated transition-all group"
-                >
-                  <div className="flex items-center justify-between text-xs font-mono mb-3">
-                    <div className="flex items-center gap-1 font-bold text-amber-400">
-                      <Award className="h-3.5 w-3.5" />
-                      <span>#{model.rank}</span>
-                    </div>
-                    <span className="rounded-full bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 text-[9px] font-bold text-status-cyan">
-                      {model.tier}
-                    </span>
-                  </div>
-
-                  <h4 className="text-sm font-bold text-slate-100 group-hover:text-status-cyan transition-colors">
-                    {model.name}
-                  </h4>
-                  <div className="text-[11px] text-slate-400 font-mono mb-4">
-                    {model.vendor}
-                  </div>
-
-                  <div className="space-y-2 border-t border-hairline/60 pt-3 text-xs font-mono">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Safety Score:</span>
-                      <span className="font-bold text-emerald-400">
-                        {model.overall_safety_rating.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Jailbreak Imm.:</span>
-                      <span className="text-slate-200">
-                        {model.jailbreak_resistance.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Timing AUC:</span>
-                      <span className="text-status-cyan">
-                        {model.side_channel_timing_auc.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
+            <div className="landing-sandbox">
+              <form onSubmit={handleSandboxDispatch}>
+                <div className="field"><label htmlFor="sandbox-prompt">Evaluation prompt</label><textarea id="sandbox-prompt" rows={4} value={sandboxPrompt} onChange={(event) => setSandboxPrompt(event.target.value)} required /></div>
+                <div className="field"><label htmlFor="sandbox-fault">Controlled fault</label><select id="sandbox-fault" value={sandboxFault} onChange={(event) => setSandboxFault(event.target.value)}>
+                  <option value="CLEAN">Clean evaluation</option>
+                  <option value="FAULT_01_NET_EGRESS">Cross-subnet egress</option>
+                  <option value="FAULT_02_PRETEST_PEEK">Pre-test prompt peek</option>
+                  <option value="FAULT_03_POLICY_DRIFT">Defense policy drift</option>
+                  <option value="FAULT_04_KV_CANARY_BLEED">KV-cache canary bleed</option>
+                  <option value="FAULT_05_DEADLINE_OVERRUN">Release deadline overrun</option>
+                  <option value="FAULT_06_TELEMETRY_DROP">Missing teardown trace</option>
+                </select></div>
+                <button className="button button-primary" type="submit" disabled={sandboxLoading || !sandboxPrompt.trim()}>
+                  {sandboxLoading ? <LoaderCircle className="spin" size={17} /> : <Play size={17} />}
+                  {sandboxLoading ? "Evaluating…" : "Run evaluation"}
+                </button>
+              </form>
+              <ErrorNotice message={sandboxError} />
+              {sandboxResult && (
+                <div className="landing-sandbox-result" role="status">
+                  <div className="row-between"><strong>Evaluation receipt</strong><Status value={sandboxResult.status} /></div>
+                  <dl>
+                    <div><dt>Run</dt><dd><code>{sandboxResult.run_id}</code></dd></div>
+                    <div><dt>Mode</dt><dd>{sandboxResult.mode}</dd></div>
+                    <div><dt>Merkle root</dt><dd><code>{sandboxResult.merkle_root}</code></dd></div>
+                    <div><dt>Signature</dt><dd><code>{sandboxResult.ed25519_signature}</code></dd></div>
+                    <div><dt>Contributed score</dt><dd>{sandboxResult.score_contributed}</dd></div>
+                  </dl>
+                  <button className="text-action" onClick={onOpenLedger}>Inspect in evidence ledger <ArrowUpRight size={16} /></button>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </section>
-      )}
 
-      {/* 4. LIVE ENCLAVE METRICS RIBBON */}
-      <section className="border-b border-hairline/80 bg-panel/80 py-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-xl border border-hairline bg-card p-4 transition-all hover:border-slate-500">
-              <div className="flex items-center justify-between text-slate-400 text-xs">
-                <span>Total Eval Runs</span>
-                <Terminal className="h-4 w-4 text-status-cyan" />
-              </div>
-              <div className="mt-2 text-2xl font-bold font-mono text-slate-100">
-                {stats ? stats.total_runs : 50}
-              </div>
-              <p className="mt-1 text-[11px] text-slate-400">Cryptographically committed</p>
+        {models.length > 0 && (
+          <section id="leaderboard" className="landing-section landing-container">
+            <div className="landing-section-heading"><div><h2>Model safety rankings.</h2><p>Explore the SEAL evaluation matrix and inspect each model’s attestation.</p></div>
+              {onOpenLeaderboard && <button className="button" onClick={onOpenLeaderboard}>View leaderboard <ArrowUpRight size={16} /></button>}
             </div>
-
-            <div className="rounded-xl border border-hairline bg-card p-4 transition-all hover:border-slate-500">
-              <div className="flex items-center justify-between text-slate-400 text-xs">
-                <span>Tamper Intercept</span>
-                <ShieldCheck className="h-4 w-4 text-status-pass" />
-              </div>
-              <div className="mt-2 text-2xl font-bold font-mono text-status-pass">
-                100.0%
-              </div>
-              <p className="mt-1 text-[11px] text-slate-400">Merkle root invalidation</p>
-            </div>
-
-            <div className="rounded-xl border border-hairline bg-card p-4 transition-all hover:border-slate-500">
-              <div className="flex items-center justify-between text-slate-400 text-xs">
-                <span>Side-Channel Defense</span>
-                <Radio className="h-4 w-4 text-status-cyan" />
-              </div>
-              <div className="mt-2 text-2xl font-bold font-mono text-status-cyan">
-                0.50 AUC
-              </div>
-              <p className="mt-1 text-[11px] text-slate-400">Constant-time Laplace padding</p>
-            </div>
-
-            <div className="rounded-xl border border-hairline bg-card p-4 transition-all hover:border-slate-500">
-              <div className="flex items-center justify-between text-slate-400 text-xs">
-                <span>Enclave Notary Key</span>
-                <Lock className="h-4 w-4 text-emerald-400" />
-              </div>
-              <div className="mt-2 text-sm font-bold font-mono text-emerald-400 truncate">
-                {stats?.enclave_public_key_fingerprint || "ED25519:8E:82:E7:93"}
-              </div>
-              <p className="mt-1 text-[11px] text-slate-400">Hardware root of trust</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. INTERACTIVE LIVE ENCLAVE SANDBOX */}
-      <section id="sandbox" className="py-20 border-b border-hairline/60 bg-panel/40">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-status-cyan/10 border border-status-cyan/30 px-3 py-1 text-xs font-mono text-status-cyan mb-2">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Interactive Demonstration</span>
-            </div>
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-100">
-              Live Enclave Dispatch Sandbox
-            </h3>
-            <p className="mt-2 text-xs sm:text-sm text-slate-400">
-              Dispatch a real adversarial probe into the live AegisBay enclave. Observe the
-              cryptographic commit, hardware blinding, and Merkle leaf attestation in real time.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-hairline-light bg-card p-6 shadow-2xl space-y-6">
-            <div className="space-y-2">
-              <label className="block text-xs font-semibold text-slate-300">
-                Adversarial Prompt Payload
-              </label>
-              <textarea
-                rows={3}
-                value={sandboxPrompt}
-                onChange={(e) => setSandboxPrompt(e.target.value)}
-                className="w-full rounded-xl border border-hairline bg-canvas-deep p-3 font-mono text-xs text-slate-200 placeholder-slate-600 focus:border-status-cyan focus:outline-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Controlled Fault Injection Class
-                </label>
-                <select
-                  value={sandboxFault}
-                  onChange={(e) => setSandboxFault(e.target.value)}
-                  className="w-full rounded-xl border border-hairline bg-canvas-deep p-2.5 font-mono text-xs text-slate-200 focus:border-status-cyan focus:outline-none"
-                >
-                  <option value="CLEAN">CLEAN (Standard Enclave Execution)</option>
-                  <option value="FAULT_01_NET_EGRESS">FAULT 01: Unauthorized Network Egress</option>
-                  <option value="FAULT_02_PRETEST_PEEK">FAULT 02: Pretest Blinding Violation</option>
-                  <option value="FAULT_03_POLICY_DRIFT">FAULT 03: Evaluator Policy Drift</option>
-                  <option value="FAULT_04_KV_CANARY_BLEED">FAULT 04: KV Canary Cache Bleed</option>
-                  <option value="FAULT_05_DEADLINE_OVERRUN">FAULT 05: Evaluation Deadline Overrun</option>
-                  <option value="FAULT_06_TELEMETRY_DROP">FAULT 06: Silent Telemetry Drop</option>
-                </select>
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  onClick={handleSandboxDispatch}
-                  disabled={sandboxLoading}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-status-cyan text-black py-2.5 px-4 text-xs font-bold hover:bg-cyan-300 active:scale-98 transition-all disabled:opacity-50 shadow-glowCyan"
-                >
-                  {sandboxLoading ? (
-                    <>
-                      <RotateCw className="h-4 w-4 animate-spin" />
-                      <span>Sealing Enclave Handshake...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-4 w-4" />
-                      <span>Dispatch to Blinded Enclave</span>
-                    </>
-                  )}
+            <div className="landing-model-list">
+              {models.map((model) => (
+                <button key={model.model_id} onClick={onOpenLeaderboard} className="landing-model">
+                  <span className="landing-model-rank">{String(model.rank).padStart(2, "0")}</span>
+                  <span className="landing-model-name"><strong>{model.name}</strong><small>{model.vendor}</small></span>
+                  <span className="landing-model-tier">{model.tier}</span>
+                  <span><strong>{model.overall_safety_rating.toFixed(1)}%</strong><small>Safety score</small></span>
+                  <span className="landing-model-detail"><strong>{model.jailbreak_resistance.toFixed(1)}%</strong><small>Jailbreak resistance</small></span>
+                  <span className="landing-model-detail"><strong>{model.side_channel_timing_auc.toFixed(2)}</strong><small>Timing AUC</small></span>
+                  <ArrowUpRight size={18} />
                 </button>
-              </div>
+              ))}
             </div>
+          </section>
+        )}
 
-            {/* Sandbox Execution Output */}
-            {sandboxResult && (
-              <div className="rounded-xl border border-status-cyan/30 bg-canvas-deep p-4 font-mono text-xs space-y-3 animate-in fade-in duration-200">
-                <div className="flex items-center justify-between pb-2 border-b border-hairline text-slate-300">
-                  <span className="text-status-cyan font-bold">
-                    EXECUTION ATTESTATION RECEIPT
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      sandboxResult.run_data.status === "ELIGIBLE"
-                        ? "bg-status-pass/20 text-status-pass border border-status-pass/40"
-                        : "bg-status-fail/20 text-status-fail border border-status-fail/40"
-                    }`}
-                  >
-                    STATUS: {sandboxResult.run_data.status}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-400">
-                  <div>
-                    <span className="text-slate-500">Run ID:</span>{" "}
-                    <span className="text-slate-200">{sandboxResult.run_data.run_id}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500">Enclave Mode:</span>{" "}
-                    <span className="text-status-cyan">{sandboxResult.run_data.mode}</span>
-                  </div>
-                  <div className="truncate">
-                    <span className="text-slate-500">Merkle Root:</span>{" "}
-                    <span className="text-emerald-400">{sandboxResult.run_data.merkle_root}</span>
-                  </div>
-                  <div className="truncate">
-                    <span className="text-slate-500">Ed25519 Notary Sig:</span>{" "}
-                    <span className="text-purple-400">
-                      {sandboxResult.run_data.ed25519_signature}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-hairline flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">
-                    Contributed Score: {sandboxResult.run_data.score_contributed}
-                  </span>
-                  <button
-                    onClick={onOpenLedger}
-                    className="text-status-cyan hover:underline flex items-center gap-1"
-                  >
-                    <span>View in Full Ledger</span>
-                    <ChevronRight className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            )}
+        <section className="landing-devices landing-container">
+          <div><h2>The same workspace.<br />Wherever you review.</h2><p>Review receipts on your phone, compare experiments on a laptop, or use the full workspace at your desk.</p></div>
+          <div className="landing-device-list">
+            <span><Smartphone size={30} strokeWidth={1.5} /><strong>Mobile</strong><small>iOS & Android</small></span>
+            <span><Laptop size={36} strokeWidth={1.5} /><strong>Tablet & laptop</strong><small>iPad, Mac & Windows</small></span>
+            <span><Monitor size={34} strokeWidth={1.5} /><strong>Desktop</strong><small>Full workspace</small></span>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 6. SIX ARCHITECTURAL PILLARS */}
-      <section id="features" className="py-20 border-b border-hairline/60">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-xs font-mono uppercase tracking-widest text-status-cyan mb-2">
-              Zero-Trust Enclave Capabilities
-            </h2>
-            <h3 className="text-2xl sm:text-4xl font-bold text-slate-100">
-              Engineered for Provable Integrity
-            </h3>
-            <p className="mt-3 text-sm text-slate-400">
-              Every stage of the evaluation pipeline is sealed against tampering, side-channels, and
-              unauthorized observer interference.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-hairline bg-card p-6 hover:border-status-cyan/50 transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-status-cyan/10 border border-status-cyan/30 text-status-cyan mb-4">
-                <Lock className="h-5 w-5" />
-              </div>
-              <h4 className="text-base font-bold text-slate-100">Blinded Zero-Trust Enclave</h4>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Hardware-isolated double-blind containers ensure neither the model nor the evaluator
-                has unmonitored egress or memory bleed before execution locks.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-hairline bg-card p-6 hover:border-status-cyan/50 transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 mb-4">
-                <FileCheck2 className="h-5 w-5" />
-              </div>
-              <h4 className="text-base font-bold text-slate-100">Cryptographic Commit-Reveal</h4>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Both parties publish SHA-256 commitments to an immutable registry before inputs are
-                revealed, mathematically eliminating front-running and benchmark collusion.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-hairline bg-card p-6 hover:border-status-cyan/50 transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-status-pass/10 border border-status-pass/30 text-status-pass mb-4">
-                <Radio className="h-5 w-5" />
-              </div>
-              <h4 className="text-base font-bold text-slate-100">Side-Channel Timing Defense</h4>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                All evaluation outputs are quantized with Laplace constant-time padding, reducing
-                timing attack discriminator AUC to 0.50 (perfect statistical indistinguishability).
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-hairline bg-card p-6 hover:border-status-cyan/50 transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400 mb-4">
-                <Cpu className="h-5 w-5" />
-              </div>
-              <h4 className="text-base font-bold text-slate-100">TinyFish Sentinel Integration</h4>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Real-time autonomous web agent sentinels monitor external egress sinks and synthetic
-                canary tokens, terminating compromised runs instantly upon detection.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-hairline bg-card p-6 hover:border-status-cyan/50 transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-4">
-                <Database className="h-5 w-5" />
-              </div>
-              <h4 className="text-base font-bold text-slate-100">Four-Leaf Merkle DAG Notary</h4>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Every test creates four cryptographic leaves (Config, Attestation, Raw Result,
-                Status) bound into a Merkle root and signed with an Ed25519 hardware key.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-hairline bg-card p-6 hover:border-status-cyan/50 transition-all">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 mb-4">
-                <Layers className="h-5 w-5" />
-              </div>
-              <h4 className="text-base font-bold text-slate-100">Zero Score Contamination</h4>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Adversarial faults (egress attempts, canary bleeds, policy drifts) are isolated and
-                marked INVALID. Only clean, attested runs enter the benchmark safety score.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. CROSS-PLATFORM & PROGRESSIVE WEB APP (PWA) SUPPORT */}
-      <section className="py-16 border-b border-hairline/60 bg-panel/40">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-status-pass/10 border border-status-pass/30 px-3 py-1 text-xs font-mono text-status-pass">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>UNIVERSAL CROSS-PLATFORM SUPPORT</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-slate-100">
-                PWA Ready for Mobile, Tablet, & Workstations
-              </h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
-                AegisBay is engineered with a mobile-first, responsive architecture and Progressive
-                Web App (PWA) manifest. Security auditors can review attestations from iOS, Android,
-                macOS, Linux, or Windows with full touch support and zero degradation.
-              </p>
-
-              <div className="grid grid-cols-3 gap-3 pt-2">
-                <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-hairline bg-card text-center">
-                  <Smartphone className="h-5 w-5 text-status-cyan mb-1" />
-                  <span className="text-xs font-semibold text-slate-200">Mobile</span>
-                  <span className="text-[10px] text-slate-400">iOS & Android</span>
-                </div>
-                <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-hairline bg-card text-center">
-                  <Laptop className="h-5 w-5 text-emerald-400 mb-1" />
-                  <span className="text-xs font-semibold text-slate-200">Tablet & Laptop</span>
-                  <span className="text-[10px] text-slate-400">iPad, Mac, Windows</span>
-                </div>
-                <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-hairline bg-card text-center">
-                  <Monitor className="h-5 w-5 text-purple-400 mb-1" />
-                  <span className="text-xs font-semibold text-slate-200">Desktop / 4K</span>
-                  <span className="text-[10px] text-slate-400">SecOps Console</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-hairline-light bg-card p-6 shadow-card space-y-4 font-mono text-xs text-slate-300">
-              <div className="flex items-center justify-between pb-3 border-b border-hairline text-status-cyan">
-                <span>PWA DEPLOYMENT SPECIFICATION</span>
-                <span className="text-[10px] text-slate-500">STANDALONE APP</span>
-              </div>
-              <div className="space-y-2 text-[11px]">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Manifest Standard:</span>
-                  <span className="text-slate-200">W3C Web Application Manifest</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Display Mode:</span>
-                  <span className="text-emerald-400">Standalone (Full Canvas)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Offline Resilience:</span>
-                  <span className="text-slate-200">Local Cache & SQLite Synchronization</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Mobile Touch Targets:</span>
-                  <span className="text-slate-200">48px Ergonomic Hitboxes</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. SECURITY & ENCLAVE FAQ */}
-      <section id="faq" className="py-20 border-b border-hairline/60">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-xs font-mono uppercase tracking-widest text-status-cyan mb-2">
-              Safety Architecture Clarifications
-            </h2>
-            <h3 className="text-2xl sm:text-3xl font-bold text-slate-100">
-              Frequently Asked Questions
-            </h3>
-          </div>
-
-          <div className="space-y-4">
-            <div className="rounded-xl border border-hairline bg-card p-5 space-y-2">
-              <h4 className="text-sm font-semibold text-slate-200">
-                How does AegisBay prevent evaluator and vendor collusion?
-              </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                By enforcing cryptographic commit-reveal before any test execution begins. Both the
-                test prompt hash and evaluator model configuration hash are sealed to the immutable
-                ledger. Evaluators cannot alter scoring metrics dynamically once the evaluation run
-                starts.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-hairline bg-card p-5 space-y-2">
-              <h4 className="text-sm font-semibold text-slate-200">
-                What guarantees exist against post-hoc database manipulation?
-              </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Every run generates a 4-leaf SHA-256 Merkle tree signed by an Ed25519 enclave key.
-                If any record in SQLite is modified post-execution, the recalculation of the Merkle
-                root fails immediately, triggering a TAMPER_DETECTED alert in the telemetry header.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-hairline bg-card p-5 space-y-2">
-              <h4 className="text-sm font-semibold text-slate-200">
-                How does constant-time padding defeat timing attacks?
-              </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Adversarial models attempt to determine whether their injection prompts bypassed
-                filters by measuring nanosecond delays. AegisBay clamps and pads all response
-                latencies to a uniform distribution, reducing timing classifier AUC to 0.50 (chance).
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 9. BOTTOM CTA */}
-      <section className="py-16 bg-[radial-gradient(ellipse_80%_60%_at_50%_120%,rgba(6,182,212,0.15),rgba(255,255,255,0))] text-center">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-6">
-          <h3 className="text-2xl sm:text-4xl font-extrabold text-slate-100">
-            Ready to Inspect the Evidence-Gated Enclave?
-          </h3>
-          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto">
-            Experience real-time zero-trust AI evaluation. Audit cryptographic proofs, trigger
-            simulated attacks, and verify Merkle signatures in the SecOps Workbench.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              onClick={onLaunchConsole}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-status-cyan text-black px-8 py-3.5 text-sm font-bold hover:bg-cyan-300 active:scale-95 transition-all shadow-glowCyan"
-            >
-              <span>Open SecOps Workbench</span>
-              <ArrowRight className="h-4 w-4" />
-            </button>
-            {onOpenLeaderboard && (
-              <button
-                onClick={onOpenLeaderboard}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-8 py-3.5 text-sm font-semibold text-amber-300 hover:bg-amber-500/20 transition-all"
-              >
-                <Trophy className="h-4 w-4 text-amber-400" />
-                <span>SEAL Leaderboard</span>
-              </button>
-            )}
-            <button
-              onClick={onOpenLedger}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-hairline-light bg-card px-8 py-3.5 text-sm font-semibold text-slate-200 hover:bg-card-elevated transition-all"
-            >
-              <Database className="h-4 w-4 text-emerald-400" />
-              <span>Inspect Public Ledger</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 10. FOOTER */}
-      <footer className="border-t border-hairline/80 bg-canvas-deep py-8 text-xs text-slate-500 font-mono">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-status-cyan" />
-            <span>AegisBay Enclave • Hack in Hills 2026 (Track 04: Bayora)</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span>Team Awara Coders</span>
-            <span>•</span>
-            <span>Lead: Ayush Sarkar</span>
-            <span>•</span>
-            <a
-              href="https://github.com/Ayushnot41/AgeisBay"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-status-cyan transition-colors"
-            >
-              GitHub Repository
-            </a>
-          </div>
-        </div>
+        <section id="faq" className="landing-section landing-container landing-faq">
+          <h2>A closer look.</h2>
+          <div>{faqs.map((faq) => (
+            <details key={faq.question}><summary>{faq.question}<Plus size={19} /></summary><p>{faq.answer}</p></details>
+          ))}</div>
+        </section>
+        <section className="landing-final landing-container">
+          <h2>Your next evaluation<br />starts here.</h2>
+          <div><button className="button button-primary" onClick={onLaunchConsole}>Open workspace <ArrowUpRight size={18} /></button><button className="text-action" onClick={onOpenLedger}>Review the ledger</button></div>
+        </section>
+      </main>
+      <footer className="landing-footer landing-container">
+        <a className="landing-brand" href="#home"><span className="aegis-brand-mark">A</span><span>AegisBay</span></a>
+        <span>Hack in Hills 2026 · Track 04: Bayora</span>
+        <span>Team Awara Coders · Lead: Ayush Sarkar</span>
+        <a href="https://github.com/souravsamaddar77-eng/AgeisBay" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={15} /></a>
       </footer>
     </div>
   );

@@ -94,7 +94,7 @@ export default function EvidenceLedgerView({
           <button
             className="secondary-button"
             onClick={handleExportCheckpoint}
-            style={{ fontSize: "11px", padding: "4px 8px", display: "flex", alignItems: "center", gap: "5px" }}
+            style={{ fontSize: "13px", padding: "4px 8px", display: "flex", alignItems: "center", gap: "5px" }}
           >
             <Download size={13} />
             <span>Export Checkpoint</span>
@@ -102,7 +102,7 @@ export default function EvidenceLedgerView({
         </div>
       }
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+      <div className="panel-body" style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
         {/* Search and Filters Bar */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
           <form
@@ -134,14 +134,14 @@ export default function EvidenceLedgerView({
                 border: "1px solid var(--border)",
                 borderRadius: "5px",
                 color: "var(--text)",
-                fontSize: "12px",
+                fontSize: "13px",
               }}
             />
           </form>
 
           {/* Status Filter */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "11px", color: "var(--muted)" }}>Status:</span>
+            <span style={{ fontSize: "13px", color: "var(--muted)" }}>Status:</span>
             <select
               value={statusFilter}
               onChange={(e) => {
@@ -153,7 +153,7 @@ export default function EvidenceLedgerView({
                 border: "1px solid var(--border)",
                 borderRadius: "5px",
                 color: "var(--text)",
-                fontSize: "11px",
+                fontSize: "13px",
                 padding: "5px 8px",
               }}
             >
@@ -166,7 +166,7 @@ export default function EvidenceLedgerView({
 
           {/* Mode Filter */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "11px", color: "var(--muted)" }}>Mode:</span>
+            <span style={{ fontSize: "13px", color: "var(--muted)" }}>Mode:</span>
             <select
               value={modeFilter}
               onChange={(e) => {
@@ -178,7 +178,7 @@ export default function EvidenceLedgerView({
                 border: "1px solid var(--border)",
                 borderRadius: "5px",
                 color: "var(--text)",
-                fontSize: "11px",
+                fontSize: "13px",
                 padding: "5px 8px",
               }}
             >
@@ -190,7 +190,7 @@ export default function EvidenceLedgerView({
 
           {/* Page Size Selector */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "11px", color: "var(--muted)" }}>Per page:</span>
+            <span style={{ fontSize: "13px", color: "var(--muted)" }}>Per page:</span>
             <select
               value={pageSize}
               onChange={(e) => {
@@ -202,7 +202,7 @@ export default function EvidenceLedgerView({
                 border: "1px solid var(--border)",
                 borderRadius: "5px",
                 color: "var(--text)",
-                fontSize: "11px",
+                fontSize: "13px",
                 padding: "5px 8px",
               }}
             >
@@ -221,7 +221,7 @@ export default function EvidenceLedgerView({
             style={{
               width: "100%",
               borderCollapse: "collapse",
-              fontSize: "11px",
+              fontSize: "13px",
               textAlign: "left",
             }}
           >
@@ -263,8 +263,8 @@ export default function EvidenceLedgerView({
                       onClick={() => onSelectRun(r)}
                       style={{
                         cursor: "pointer",
-                        borderBottom: "1px solid rgba(255,255,255,0.04)",
-                        background: isSelected ? "rgba(6, 182, 212, 0.08)" : "transparent",
+                        borderBottom: "1px solid var(--line)",
+                        background: isSelected ? "var(--accent-soft)" : "transparent",
                         transition: "background 0.15s ease",
                       }}
                     >
@@ -276,9 +276,9 @@ export default function EvidenceLedgerView({
                           {r.is_tampered === 1 && (
                             <span
                               style={{
-                                fontSize: "9px",
-                                background: "#EF4444",
-                                color: "#fff",
+                                fontSize: "13px",
+                                background: "rgb(var(--c-fail) / 10%)",
+                                color: "var(--fail)",
                                 padding: "1px 4px",
                                 borderRadius: "3px",
                                 fontWeight: 700,
@@ -288,17 +288,17 @@ export default function EvidenceLedgerView({
                             </span>
                           )}
                         </div>
-                        <div style={{ fontSize: "9.5px", color: "var(--muted)" }}>{r.experiment_id}</div>
+                        <div style={{ fontSize: "13px", color: "var(--muted)" }}>{r.experiment_id}</div>
                       </td>
 
                       <td style={{ padding: "8px 10px" }}>
                         <span
                           style={{
-                            fontSize: "10px",
+                            fontSize: "13px",
                             padding: "2px 6px",
                             borderRadius: "4px",
-                            background: r.mode === "HARDENED" ? "rgba(16, 185, 129, 0.15)" : "rgba(148, 163, 184, 0.15)",
-                            color: r.mode === "HARDENED" ? "#10B981" : "#94A3B8",
+                            background: r.mode === "HARDENED" ? "rgb(var(--c-pass) / 10%)" : "var(--raised)",
+                            color: r.mode === "HARDENED" ? "var(--pass)" : "var(--muted)",
                             fontWeight: 600,
                           }}
                         >
@@ -307,13 +307,13 @@ export default function EvidenceLedgerView({
                       </td>
 
                       <td style={{ padding: "8px 10px" }}>
-                        <code style={{ fontSize: "10.5px" }}>{r.fault_class}</code>
+                        <code style={{ fontSize: "13px" }}>{r.fault_class}</code>
                       </td>
 
                       <td style={{ padding: "8px 10px" }}>
                         <span
                           style={{
-                            color: checksPassed === 6 ? "#10B981" : "#EF4444",
+                            color: checksPassed === 6 ? "var(--pass)" : "var(--fail)",
                             fontWeight: 600,
                           }}
                         >
@@ -323,7 +323,7 @@ export default function EvidenceLedgerView({
 
                       <td style={{ padding: "8px 10px" }}>
                         <div>{r.padded_latency_ms.toFixed(1)} ms</div>
-                        <div style={{ fontSize: "9.5px", color: "var(--muted)" }}>
+                        <div style={{ fontSize: "13px", color: "var(--muted)" }}>
                           raw: {r.raw_latency_ms.toFixed(1)}ms
                         </div>
                       </td>
@@ -334,7 +334,7 @@ export default function EvidenceLedgerView({
 
                       <td style={{ padding: "8px 10px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                          <code style={{ fontSize: "10px", color: "var(--muted)" }}>
+                          <code style={{ fontSize: "13px", color: "var(--muted)" }}>
                             {r.merkle_root.substring(0, 10)}...{r.merkle_root.substring(58)}
                           </code>
                           <CopyButton value={r.merkle_root} label="Copy Merkle root" />
@@ -345,7 +345,7 @@ export default function EvidenceLedgerView({
                         <button
                           className="secondary-button"
                           style={{
-                            fontSize: "10px",
+                            fontSize: "13px",
                             padding: "3px 7px",
                             borderColor: isSelected ? "var(--cyan)" : undefined,
                           }}
@@ -373,7 +373,7 @@ export default function EvidenceLedgerView({
               justifyContent: "space-between",
               alignItems: "center",
               paddingTop: "6px",
-              fontSize: "11px",
+              fontSize: "13px",
               color: "var(--muted)",
             }}
           >
