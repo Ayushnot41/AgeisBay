@@ -129,7 +129,7 @@ export default function TinyFishSentinelCard({
           </form>
           <div>
             <div className="row-between" style={{ marginBottom: 16 }}>
-              <strong style={{ fontSize: 13 }}>Curated test corpus</strong>
+              <strong style={{ fontSize: 15 }}>Curated test corpus</strong>
               <span className="subtle">{threats.length} scenarios</span>
             </div>
             <div className="threat-list">

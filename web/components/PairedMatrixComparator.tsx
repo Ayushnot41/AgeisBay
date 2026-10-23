@@ -74,8 +74,8 @@ export default function PairedMatrixComparator({
       ) : chart ? (
         <div className="panel-body">
           <div className="legend">
-            <span>Rose · Baseline</span>
-            <span>Cyan · Hardened</span>
+            <span>Baseline</span>
+            <span>Hardened</span>
           </div>
           {rows.map((row) => (
             <div className="chart-row" key={row.fault_class}>
@@ -133,11 +133,11 @@ export default function PairedMatrixComparator({
                   <td>
                     <Status value={row.hardened.status} />
                   </td>
-                  <td className="font-mono">
+                  <td className="font-sans">
                     {row.baseline.score_contributed} /{" "}
                     {row.hardened.score_contributed}
                   </td>
-                  <td className="font-mono">
+                  <td className="font-sans">
                     {row.hardened.padded_latency_ms} ms
                   </td>
                 </tr>

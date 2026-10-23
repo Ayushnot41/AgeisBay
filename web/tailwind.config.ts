@@ -1,50 +1,37 @@
 import type { Config } from "tailwindcss";
 
+const colour = (name: string) => `rgb(var(--c-${name}) / <alpha-value>)`;
+
 export default {
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./pages/**/*.{js,ts,jsx,tsx,mdx}", "./components/**/*.{js,ts,jsx,tsx,mdx}", "./app/**/*.{js,ts,jsx,tsx,mdx}"],
   darkMode: "class",
   theme: {
     extend: {
       colors: {
-        canvas: {
-          DEFAULT: "#07090E",
-          deep: "#040609",
-        },
-        panel: {
-          DEFAULT: "#0D111A",
-          hover: "#111724",
-        },
-        card: {
-          DEFAULT: "#151C28",
-          elevated: "#192231",
-        },
-        hairline: {
-          DEFAULT: "#1E293B",
-          light: "#2A384F",
-        },
+        canvas: { DEFAULT: colour("canvas"), deep: colour("canvas") },
+        panel: { DEFAULT: colour("surface"), hover: colour("hover") },
+        card: { DEFAULT: colour("surface"), elevated: colour("raised") },
+        hairline: { DEFAULT: colour("line"), light: colour("line-strong") },
+        ink: colour("ink"), body: colour("body"), muted: colour("muted"),
+        accent: { DEFAULT: colour("accent"), hover: colour("accent-hover"), contrast: colour("on-accent") },
         status: {
-          pass: "#10B981",
-          fail: "#EF4444",
-          warn: "#F59E0B",
-          cyan: "#06B6D4",
-          enclave: "#3B82F6",
+          pass: colour("pass"), fail: colour("fail"), warn: colour("warn"),
+          cyan: colour("accent"), enclave: colour("accent"),
         },
       },
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
-        mono: ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        sans: ["var(--font-body)", "Segoe UI", "sans-serif"],
+        display: ["var(--font-display)", "sans-serif"],
+        mono: ["var(--font-code)", "Consolas", "monospace"],
+      },
+      fontSize: {
+        xs: ["0.8125rem", { lineHeight: "1.5" }],
+        sm: ["0.9375rem", { lineHeight: "1.6" }],
       },
       boxShadow: {
-        recessed: "inset 0 2px 4px 0 rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.25)",
-        card: "0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)",
-        specular: "inset 0 1px 0 0 rgba(255, 255, 255, 0.08)",
-        glowCyan: "0 0 15px -3px rgba(6, 182, 212, 0.3)",
-        glowPass: "0 0 15px -3px rgba(16, 185, 129, 0.3)",
-        glowFail: "0 0 15px -3px rgba(239, 68, 68, 0.3)",
+        recessed: "inset 0 1px 3px rgb(0 0 0 / .06)",
+        card: "var(--shadow-panel)",
+        specular: "none", glowCyan: "none", glowPass: "none", glowFail: "none",
       },
     },
   },

@@ -115,11 +115,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-2xl border border-hairline-light bg-panel shadow-2xl transition-all"
+        className="relative w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-hairline-light bg-panel shadow-2xl transition-all"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top Gradient Ribbon */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-status-cyan via-blue-500 to-emerald-400" />
+        <div className="h-1 w-full bg-accent" />
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-hairline/80 px-6 py-4">
@@ -128,16 +127,16 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               <ShieldCheck className="h-4 w-4" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold tracking-wide text-slate-100 uppercase">
+              <h2 className="text-sm font-semibold tracking-wide text-ink uppercase">
                 AegisBay Authorization
               </h2>
-              <p className="text-[11px] text-slate-400">Zero-Trust Evaluator Enclave Session</p>
+              <p className="text-sm text-muted">Zero-Trust Evaluator Enclave Session</p>
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="rounded-lg p-1 text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-colors"
+            className="rounded-lg p-1 text-muted hover:bg-accent/5 hover:text-ink transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -153,7 +152,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             className={`flex items-center justify-center gap-1.5 py-2 rounded-md font-medium transition-all ${
               activeTab === "google"
                 ? "bg-panel text-status-cyan border border-status-cyan/30 shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+                : "text-muted hover:text-ink"
             }`}
           >
             <span>Google</span>
@@ -166,7 +165,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             className={`flex items-center justify-center gap-1.5 py-2 rounded-md font-medium transition-all ${
               activeTab === "email"
                 ? "bg-panel text-status-cyan border border-status-cyan/30 shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+                : "text-muted hover:text-ink"
             }`}
           >
             <span>Email</span>
@@ -179,7 +178,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             className={`flex items-center justify-center gap-1.5 py-2 rounded-md font-medium transition-all ${
               activeTab === "demo"
                 ? "bg-panel text-status-pass border border-status-pass/30 shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+                : "text-muted hover:text-ink"
             }`}
           >
             <span>Quick Demo</span>
@@ -189,7 +188,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         {/* Body Content */}
         <div className="p-6">
           {error && (
-            <div className="mb-4 flex items-center gap-2 rounded-lg border border-status-fail/30 bg-status-fail/10 p-3 text-xs text-red-300">
+            <div className="mb-4 flex items-center gap-2 rounded-lg border border-status-fail/30 bg-status-fail/10 p-3 text-xs text-status-fail">
               <AlertCircle className="h-4 w-4 shrink-0 text-status-fail" />
               <span>{error}</span>
             </div>
@@ -198,7 +197,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           {/* TAB 1: GOOGLE AUTH */}
           {activeTab === "google" && (
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/10 shadow-inner">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/5 border border-hairline shadow-inner">
                 <svg className="h-6 w-6" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
@@ -219,8 +218,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                 </svg>
               </div>
 
-              <h3 className="text-base font-semibold text-slate-100">Sign in with Google</h3>
-              <p className="mt-1 text-xs text-slate-400 max-w-xs">
+              <h3 className="text-base font-semibold text-ink">Sign in with Google</h3>
+              <p className="mt-1 text-sm text-muted max-w-xs">
                 Authorize your identity as a certified AI safety auditor via Google OAuth 2.0.
               </p>
 
@@ -234,7 +233,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                     loginDemo("Lead Auditor");
                     onClose();
                   }}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-hairline-light bg-card px-4 py-2.5 text-xs font-medium text-slate-200 hover:bg-card-elevated hover:border-slate-500 transition-all shadow-sm"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-hairline-light bg-card px-4 py-2.5 text-xs font-medium text-ink hover:bg-card-elevated hover:border-hairline-light transition-all shadow-sm"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24">
                     <path
@@ -263,7 +262,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                 <button
                   type="button"
                   onClick={() => setShowClientIdConfig(!showClientIdConfig)}
-                  className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 hover:text-status-cyan transition-colors"
+                  className="flex items-center justify-center gap-1.5 text-xs text-muted hover:text-status-cyan transition-colors"
                 >
                   <KeyRound className="h-3 w-3" />
                   <span>
@@ -275,7 +274,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
                 {showClientIdConfig && (
                   <div className="mt-3 rounded-lg border border-hairline/80 bg-canvas-deep/80 p-3 text-left">
-                    <label className="text-[10px] font-medium uppercase tracking-wider text-slate-400">
+                    <label className="text-xs font-medium tracking-normal text-muted">
                       Google OAuth Web Client ID
                     </label>
                     <input
@@ -283,13 +282,13 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                       placeholder="e.g. 123456789-abc.apps.googleusercontent.com"
                       value={clientIdInput}
                       onChange={(e) => setClientIdInput(e.target.value)}
-                      className="mt-1 w-full rounded border border-hairline bg-card px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:border-status-cyan focus:outline-none"
+                      className="mt-1 w-full rounded border border-hairline bg-card px-2.5 py-1.5 text-xs text-ink placeholder-muted focus:border-status-cyan focus:outline-none"
                     />
                     <div className="mt-2 flex justify-end gap-2">
                       <button
                         type="button"
                         onClick={handleSaveClientId}
-                        className="rounded bg-status-cyan/20 border border-status-cyan/40 px-2.5 py-1 text-[11px] font-medium text-status-cyan hover:bg-status-cyan/30"
+                        className="rounded bg-status-cyan/20 border border-status-cyan/40 px-2.5 py-1 text-xs font-medium text-status-cyan hover:bg-status-cyan/30"
                       >
                         Save Client ID
                       </button>
@@ -305,11 +304,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
             <form onSubmit={handleEmailSubmit} className="space-y-3.5">
               {isRegister && (
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-300">
+                  <label className="block text-xs font-medium text-body">
                     Auditor Full Name
                   </label>
                   <div className="relative mt-1">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted">
                       <UserIcon className="h-4 w-4" />
                     </div>
                     <input
@@ -317,18 +316,18 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                       placeholder="e.g. Dr. Alex Vance"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full rounded-xl border border-hairline bg-card py-2 pl-9 pr-3 text-xs text-slate-100 placeholder-slate-600 focus:border-status-cyan focus:outline-none"
+                      className="w-full rounded-xl border border-hairline bg-card py-2 pl-9 pr-3 text-xs text-ink placeholder-muted focus:border-status-cyan focus:outline-none"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-300">
+                <label className="block text-xs font-medium text-body">
                   Institutional / Corporate Email
                 </label>
                 <div className="relative mt-1">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted">
                     <Mail className="h-4 w-4" />
                   </div>
                   <input
@@ -337,17 +336,17 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                     placeholder="auditor@safety-institute.org"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-xl border border-hairline bg-card py-2 pl-9 pr-3 text-xs text-slate-100 placeholder-slate-600 focus:border-status-cyan focus:outline-none"
+                    className="w-full rounded-xl border border-hairline bg-card py-2 pl-9 pr-3 text-xs text-ink placeholder-muted focus:border-status-cyan focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-300">
+                <label className="block text-xs font-medium text-body">
                   Enclave Passphrase
                 </label>
                 <div className="relative mt-1">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted">
                     <Lock className="h-4 w-4" />
                   </div>
                   <input
@@ -356,7 +355,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                     placeholder="Enter security passphrase"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border border-hairline bg-card py-2 pl-9 pr-3 text-xs text-slate-100 placeholder-slate-600 focus:border-status-cyan focus:outline-none"
+                    className="w-full rounded-xl border border-hairline bg-card py-2 pl-9 pr-3 text-xs text-ink placeholder-muted focus:border-status-cyan focus:outline-none"
                   />
                 </div>
               </div>
@@ -377,7 +376,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                 <button
                   type="button"
                   onClick={() => setIsRegister(!isRegister)}
-                  className="text-[11px] text-slate-400 hover:text-slate-200 transition-colors"
+                  className="text-xs text-muted hover:text-ink transition-colors"
                 >
                   {isRegister
                     ? "Already have certified credentials? Sign In"
@@ -390,7 +389,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           {/* TAB 3: INSTANT DEMO ROLES */}
           {activeTab === "demo" && (
             <div className="space-y-2.5">
-              <p className="text-xs text-slate-400 mb-3">
+              <p className="text-sm text-muted mb-3">
                 Select an authorized persona for instant hackathon evaluation:
               </p>
 
@@ -404,10 +403,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-semibold text-slate-100 group-hover:text-status-cyan transition-colors">
+                    <div className="text-xs font-semibold text-ink group-hover:text-status-cyan transition-colors">
                       Lead AI Safety Auditor
                     </div>
-                    <div className="text-[11px] text-slate-400">
+                    <div className="text-xs text-muted">
                       Ayush Sarkar • Hack in Hills 2026
                     </div>
                   </div>
@@ -418,50 +417,50 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               <button
                 type="button"
                 onClick={() => handleDemoSelect("Enclave Operator")}
-                className="flex w-full items-center justify-between rounded-xl border border-hairline bg-card p-3 text-left hover:border-slate-500 hover:bg-card-elevated transition-all group"
+                className="flex w-full items-center justify-between rounded-xl border border-hairline bg-card p-3 text-left hover:border-hairline-light hover:bg-card-elevated transition-all group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10 border border-accent/30 text-accent">
                     <Cpu className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-semibold text-slate-100 group-hover:text-blue-400 transition-colors">
+                    <div className="text-xs font-semibold text-ink group-hover:text-accent transition-colors">
                       Zero-Trust Enclave SecOps
                     </div>
-                    <div className="text-[11px] text-slate-400">
+                    <div className="text-xs text-muted">
                       Full attestation and dispatch authority
                     </div>
                   </div>
                 </div>
-                <div className="text-[10px] uppercase font-mono text-slate-500">Tier 1</div>
+                <div className="text-xs uppercase font-sans text-muted">Tier 1</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleDemoSelect("Judge / Evaluator")}
-                className="flex w-full items-center justify-between rounded-xl border border-hairline bg-card p-3 text-left hover:border-emerald-500 hover:bg-card-elevated transition-all group"
+                className="flex w-full items-center justify-between rounded-xl border border-hairline bg-card p-3 text-left hover:border-status-pass hover:bg-card-elevated transition-all group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-status-pass/10 border border-status-pass/30 text-status-pass">
                     <ShieldCheck className="h-4 w-4" />
                   </div>
                   <div>
-                    <div className="text-xs font-semibold text-slate-100 group-hover:text-emerald-400 transition-colors">
+                    <div className="text-xs font-semibold text-ink group-hover:text-status-pass transition-colors">
                       Hackathon Judge & Reviewer
                     </div>
-                    <div className="text-[11px] text-slate-400">
+                    <div className="text-xs text-muted">
                       Track 04: Bayora Evaluation Clearance
                     </div>
                   </div>
                 </div>
-                <div className="text-[10px] uppercase font-mono text-emerald-500">Verified</div>
+                <div className="text-xs uppercase font-sans text-status-pass">Verified</div>
               </button>
             </div>
           )}
         </div>
 
         {/* Footer Security Seal */}
-        <div className="border-t border-hairline/80 bg-canvas-deep/80 px-6 py-3 flex items-center justify-between text-[10px] text-slate-500">
+        <div className="border-t border-hairline/80 bg-canvas-deep/80 px-6 py-3 flex items-center justify-between text-xs text-muted">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="h-3 w-3 text-status-cyan" />
             <span>Ed25519 Cryptographic Session Gating</span>
