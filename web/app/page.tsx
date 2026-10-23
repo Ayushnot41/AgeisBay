@@ -3,45 +3,45 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { MotionConfig } from "framer-motion";
 import {
-  TelemetryStats,
-  EvaluationRun,
   AblationMatrixRow,
-  TinyFishThreat,
-  getTelemetryStats,
-  getRuns,
-  getAblationMatrix,
   API_BASE,
+  EvaluationRun,
+  TelemetryStats,
+  TinyFishThreat,
+  getAblationMatrix,
+  getRuns,
+  getTelemetryStats,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import TelemetryRibbon from "@/components/TelemetryRibbon";
-import EnclaveTopology from "@/components/EnclaveTopology";
-import CommitRevealDispatcher from "@/components/CommitRevealDispatcher";
-import PairedMatrixComparator from "@/components/PairedMatrixComparator";
-import MerkleTreeVisualizer from "@/components/MerkleTreeVisualizer";
+import CommitRevealDispatcher, {
+  faultOptions,
+} from "@/components/CommitRevealDispatcher";
 import TopologyDagModal from "@/components/TopologyDagModal";
 import TinyFishSentinelCard from "@/components/TinyFishSentinelCard";
 import EvidenceLedgerView from "@/components/EvidenceLedgerView";
 import SealLeaderboard from "@/components/SealLeaderboard";
 import ConstitutionalRedTeam from "@/components/ConstitutionalRedTeam";
 import LakeraGuardShield from "@/components/LakeraGuardShield";
-import LandingPage from "@/components/LandingPage";
+import EnclaveTopology from "@/components/EnclaveTopology";
+import PairedMatrixComparator from "@/components/PairedMatrixComparator";
 import AuthModal from "@/components/AuthModal";
-import { ErrorNotice, CopyButton } from "@/components/WorkbenchUI";
+import { CopyButton, ErrorNotice, Panel, Status } from "@/components/WorkbenchUI";
 import {
+  Database,
+  FlaskConical,
   Fingerprint,
   LayoutDashboard,
-  Database,
-  Radio,
-  FlaskConical,
-  Network,
-  ArrowLeft,
-  User as UserIcon,
   LogOut,
-  ShieldCheck,
-  Lock,
-  Trophy,
-  Zap,
+  Menu,
+  Network,
+  Radio,
+  RefreshCw,
   ShieldAlert,
+  ShieldCheck,
+  Trophy,
+  User as UserIcon,
+  X,
+  Zap,
 } from "lucide-react";
 import "./workbench.css";
 
@@ -55,13 +55,83 @@ type TabId =
   | "ablation"
   | "topology";
 
-type ViewMode = "landing" | "workbench";
+function faultLabel(faultClass: string) {
+  return (
+    faultOptions.find(([id]) => id === faultClass)?.[1] ??
+    faultClass.replaceAll("_", " ")
+  );
+}
+
+function RecentRunsCard({
+  runs,
+  onOpenLedger,
+  onSelectRun,
+}: {
+  runs: EvaluationRun[];
+  onOpenLedger: () => void;
+  onSelectRun: (run: EvaluationRun) => void;
+}) {
+  return (
+    <Panel
+      title="Recent runs"
+      description="Latest signed evaluation receipts."
+      action={
+        <button className="text-action" onClick={onOpenLedger}>
+          All receipts <span aria-hidden="true">→</span>
+        </button>
+      }
+    >
+      {runs.length ? (
+        <div className="recent-run-list">
+          {runs.slice(0, 4).map((run) => (
+            <button
+              className="recent-run-row"
+              key={run.run_id}
+              onClick={() => onSelectRun(run)}
+              aria-label={`Open ${faultLabel(run.fault_class)} receipt, status ${run.status}`}
+            >
+              <span className="recent-run-mark" aria-hidden="true">
+                <img
+                  src="/aegisbay/run-status-mark.svg"
+                  alt=""
+                  width={7}
+                  height={7}
+                />
+              </span>
+              <span className="recent-run-copy">
+                <span className="recent-run-title">
+                  {faultLabel(run.fault_class)}
+                </span>
+                <code>{run.run_id}</code>
+              </span>
+              <Status value={run.status} />
+              <span className="recent-run-arrow" aria-hidden="true">
+                →
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="recent-runs-empty">
+          <strong>No evaluations yet</strong>
+          <span>Your signed receipts will appear here after a run.</span>
+        </div>
+      )}
+      <div className="receipt-note">
+        <strong>Receipt verification</strong>
+        <span>
+          Each run includes a Merkle proof and an Ed25519 signature.
+        </span>
+      </div>
+    </Panel>
+  );
+}
 
 export default function SecOpsWorkbench() {
   const { user, isAuthenticated, logout } = useAuth();
-  const [view, setView] = useState<ViewMode>("landing");
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("console");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [stats, setStats] = useState<TelemetryStats | null>(null);
   const [runs, setRuns] = useState<EvaluationRun[]>([]);
   const [matrix, setMatrix] = useState<AblationMatrixRow[]>([]);
@@ -80,20 +150,20 @@ export default function SecOpsWorkbench() {
     setRefreshing(true);
     const task = (async () => {
       try {
-        const [s, r, m] = await Promise.all([
+        const [nextStats, nextRuns, nextMatrix] = await Promise.all([
           getTelemetryStats(),
           getRuns(50),
           getAblationMatrix(),
         ]);
-        setStats(s);
-        setRuns(r);
-        setMatrix(m.matrix);
+        setStats(nextStats);
+        setRuns(nextRuns);
+        setMatrix(nextMatrix.matrix);
         setSelected((previous) =>
           previous
-            ? r.find((item) => item.run_id === previous.run_id) || previous
-            : r[0] || null,
+            ? nextRuns.find((item) => item.run_id === previous.run_id) || previous
+            : nextRuns[0] || null,
         );
-        setSync(new Date().toLocaleTimeString());
+        setSync(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
         setError(null);
       } catch {
         setError(
@@ -130,341 +200,327 @@ export default function SecOpsWorkbench() {
 
   const loadThreat = useCallback((detected: TinyFishThreat) => {
     setThreat(detected);
-    const matched =
+    const knownFaults = [
+      "CLEAN",
+      "FAULT_01_NET_EGRESS",
+      "FAULT_02_PRETEST_PEEK",
+      "FAULT_03_POLICY_DRIFT",
+      "FAULT_04_KV_CANARY_BLEED",
+      "FAULT_05_DEADLINE_OVERRUN",
+      "FAULT_06_TELEMETRY_DROP",
+    ];
+    setFault(
       detected.recommended_fault_class &&
-      [
-        "CLEAN",
-        "FAULT_01_NET_EGRESS",
-        "FAULT_02_PRETEST_PEEK",
-        "FAULT_03_POLICY_DRIFT",
-        "FAULT_04_KV_CANARY_BLEED",
-        "FAULT_05_DEADLINE_OVERRUN",
-        "FAULT_06_TELEMETRY_DROP",
-      ].includes(detected.recommended_fault_class)
+        knownFaults.includes(detected.recommended_fault_class)
         ? detected.recommended_fault_class
-        : "FAULT_01_NET_EGRESS";
-    setFault(matched);
+        : "FAULT_01_NET_EGRESS",
+    );
   }, []);
 
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
-    { id: "console", label: "Operations Console", icon: <LayoutDashboard size={14} /> },
-    { id: "leaderboard", label: "SEAL Leaderboard", icon: <Trophy size={14} /> },
-    { id: "redteam", label: "Constitutional Red Team", icon: <Zap size={14} /> },
-    { id: "guard", label: "Lakera Guard Shield", icon: <ShieldAlert size={14} /> },
-    { id: "ledger", label: "Evidence Ledger", icon: <Database size={14} /> },
-    { id: "sentinel", label: "Sentinel Defense", icon: <Radio size={14} /> },
-    { id: "ablation", label: "Paired Ablation Lab", icon: <FlaskConical size={14} /> },
-    { id: "topology", label: "Subnet Topology", icon: <Network size={14} /> },
+    { id: "console", label: "Overview", icon: <LayoutDashboard size={16} /> },
+    { id: "ledger", label: "Evidence ledger", icon: <Database size={16} /> },
+    { id: "ablation", label: "Paired experiments", icon: <FlaskConical size={16} /> },
+    { id: "redteam", label: "Red-team probes", icon: <Zap size={16} /> },
+    { id: "guard", label: "Policy guard", icon: <ShieldAlert size={16} /> },
+    { id: "sentinel", label: "Network sentinel", icon: <Radio size={16} /> },
+    { id: "topology", label: "Topology", icon: <Network size={16} /> },
+    { id: "leaderboard", label: "Model leaderboard", icon: <Trophy size={16} /> },
   ];
+  const selectedTab = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
+  const pageTitle = activeTab === "console" ? "Evaluation workspace" : selectedTab.label;
+  const pageDescription =
+    activeTab === "console"
+      ? "Configure a controlled test and review its signed receipt."
+      : activeTab === "ledger"
+        ? "Review evaluation results and signed evidence."
+        : activeTab === "ablation"
+          ? "Compare the same fault scenarios across baseline and hardened runs."
+          : "Explore the tools and evidence connected to your evaluation workspace.";
+  const connectionLabel = error
+    ? "Connection interrupted"
+    : streaming
+      ? "Live updates"
+      : stats
+        ? "Connected"
+        : "Connecting";
 
-  // If viewing landing page, render LandingPage component
-  if (view === "landing") {
-    return (
-      <MotionConfig reducedMotion="user">
-        <LandingPage
-          stats={stats}
-          onLaunchConsole={() => setView("workbench")}
-          onOpenLedger={() => {
-            setView("workbench");
-            setActiveTab("ledger");
-          }}
-          onOpenAblation={() => {
-            setView("workbench");
-            setActiveTab("ablation");
-          }}
-          onOpenLeaderboard={() => {
-            setView("workbench");
-            setActiveTab("leaderboard");
-          }}
-          onOpenRedTeam={() => {
-            setView("workbench");
-            setActiveTab("redteam");
-          }}
-          onOpenGuard={() => {
-            setView("workbench");
-            setActiveTab("guard");
-          }}
-        />
-        <AuthModal
-          isOpen={authModalOpen}
-          onClose={() => setAuthModalOpen(false)}
-        />
-      </MotionConfig>
-    );
+  function selectTab(id: TabId) {
+    setActiveTab(id);
+    setSidebarOpen(false);
+    requestAnimationFrame(() => {
+      document.getElementById("workspace")?.focus({ preventScroll: true });
+    });
+  }
+
+  function openSelectedRun(run: EvaluationRun) {
+    setSelected(run);
+    selectTab("ledger");
   }
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="workbench">
+      <div className="aegis-app">
         <a href="#workspace" className="skip-link">
-          Skip to evaluation workspace
+          Skip to workspace
         </a>
 
-        {/* Global Navigation Bar for Workbench */}
-        <div className="flex items-center justify-between border-b border-hairline bg-canvas-deep px-4 py-2.5 text-xs">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setView("landing")}
-              className="flex items-center gap-1.5 rounded-lg border border-hairline-light bg-card px-2.5 py-1 text-slate-300 hover:text-status-cyan hover:border-status-cyan/50 transition-all"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Landing Page</span>
-            </button>
-            <div className="hidden sm:flex items-center gap-2 text-slate-400 font-mono text-[11px]">
-              <span className="text-slate-600">•</span>
-              <ShieldCheck className="h-3.5 w-3.5 text-status-cyan" />
-              <span>ENCLAVE WORKBENCH ACTIVE</span>
-            </div>
-          </div>
+        <aside
+          className={`aegis-sidebar${sidebarOpen ? " is-open" : ""}`}
+          aria-label="AegisBay navigation"
+        >
+          <button className="aegis-brand" onClick={() => selectTab("console")}>
+            <span className="aegis-brand-mark">A</span>
+            <span className="aegis-brand-copy">
+              <strong>AegisBay</strong>
+              <small>AI safety workspace</small>
+            </span>
+          </button>
 
-          {/* User Auth Info in Workbench Header */}
-          <div className="flex items-center gap-2.5">
-            {isAuthenticated && user ? (
-              <div className="flex items-center gap-2 rounded-lg border border-hairline bg-card px-2.5 py-1">
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="h-4 w-4 rounded-full border border-status-cyan/40 object-cover"
-                  />
-                ) : (
-                  <UserIcon className="h-3.5 w-3.5 text-status-cyan" />
-                )}
-                <span className="font-medium text-slate-200">{user.name.split(" ")[0]}</span>
-                <span className="rounded bg-status-cyan/10 border border-status-cyan/30 px-1.5 py-0.2 text-[9px] font-mono text-status-cyan uppercase">
-                  {user.role}
-                </span>
-                <button
-                  onClick={logout}
-                  title="Sign Out"
-                  className="text-slate-400 hover:text-red-400 transition-colors ml-1"
-                >
-                  <LogOut className="h-3 w-3" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setAuthModalOpen(true)}
-                className="flex items-center gap-1.5 rounded-lg border border-status-cyan/40 bg-status-cyan/10 px-2.5 py-1 text-[11px] font-medium text-status-cyan hover:bg-status-cyan/20 transition-all"
-              >
-                <Lock className="h-3 w-3" />
-                <span>Auditor Sign In</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        <TelemetryRibbon
-          stats={stats}
-          onRefresh={loadData}
-          isStreaming={streaming}
-          refreshing={refreshing}
-          stale={!!error}
-        />
-
-        <div className="page-intro">
-          <div>
-            <h1>AegisBay SecOps Enclave</h1>
-            <p>
-              Evidence-Gated AI Safety Testing & Blinded Zero-Trust Evaluation Workbench
-            </p>
-          </div>
-          <nav className="workspace-links" aria-label="Workbench views" style={{ gap: "8px", flexWrap: "wrap" }}>
-            {tabs.map((tab) => (
+          <nav className="aegis-navigation">
+            <p className="aegis-nav-label">Workspace</p>
+            {tabs.slice(0, 3).map((tab) => (
               <button
                 key={tab.id}
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  background: activeTab === tab.id ? "rgba(6, 182, 212, 0.14)" : "var(--raised)",
-                  color: activeTab === tab.id ? "var(--cyan)" : "var(--muted)",
-                  border: activeTab === tab.id ? "1px solid var(--cyan)" : "1px solid var(--border)",
-                  borderRadius: "5px",
-                  padding: "6px 12px",
-                  fontSize: "12px",
-                  fontWeight: activeTab === tab.id ? 600 : 400,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  transition: "all 0.15s ease",
-                }}
+                className={`aegis-nav-item${activeTab === tab.id ? " is-active" : ""}`}
+                aria-current={activeTab === tab.id ? "page" : undefined}
+                onClick={() => selectTab(tab.id)}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            ))}
+            <p className="aegis-nav-label aegis-nav-label-tools">Research tools</p>
+            {tabs.slice(3).map((tab) => (
+              <button
+                key={tab.id}
+                className={`aegis-nav-item${activeTab === tab.id ? " is-active" : ""}`}
+                aria-current={activeTab === tab.id ? "page" : undefined}
+                onClick={() => selectTab(tab.id)}
               >
                 {tab.icon}
                 <span>{tab.label}</span>
               </button>
             ))}
           </nav>
-        </div>
 
-        <ErrorNotice message={error} />
-
-        <main id="workspace" tabIndex={-1}>
-          {/* Global Key Metrics Ribbon */}
-          <div className="metrics-strip" aria-label="Evaluation telemetry">
-            <div className="metric">
-              <div className="metric-label">Committed evaluations</div>
-              <div className="metric-value">{stats?.total_runs ?? "—"}</div>
-              <div className="metric-note">
-                <span className="pass">
-                  {stats?.eligible_runs ?? "—"} eligible
-                </span>
-                <span className="fail">
-                  {stats?.invalid_runs ?? "—"} invalid
-                </span>
-                <span className="warn">
-                  {stats?.incomplete_runs ?? "—"} incomplete
-                </span>
-              </div>
-            </div>
-            <div className="metric">
-              <div className="metric-label">Median release · P50</div>
-              <div className="metric-value">
-                {stats?.p50_padded_ms?.toLocaleString() ?? "—"}
-                <small>ms</small>
-              </div>
-              <div className="metric-note">Calibrated constant-time window</div>
-            </div>
-            <div className="metric">
-              <div className="metric-label">Tail release · P95</div>
-              <div className="metric-value">
-                {stats?.p95_padded_ms?.toLocaleString() ?? "—"}
-                <small>ms</small>
-              </div>
-              <div className="metric-note">Bounded maximum variance</div>
-            </div>
-            <div className="metric">
-              <div className="metric-label">Execution environment</div>
-              <div className="metric-value" style={{ fontSize: 18 }}>
-                Zero-Trust Enclave
-              </div>
-              <div className="metric-note">
-                RFC 8785 Merkle · Ed25519 Certified
-              </div>
-            </div>
+          <div className="aegis-sidebar-status">
+            <span className={`connection-dot${error ? " is-offline" : ""}`}>
+              <img
+                src="/aegisbay/connection-indicator.svg"
+                alt=""
+                width={7}
+                height={7}
+              />
+            </span>
+            <span className="sidebar-status-copy">
+              <strong>{error ? "Mediator offline" : "Mediator connected"}</strong>
+              <small>Simulated worker</small>
+            </span>
           </div>
+        </aside>
 
-          {/* Tab 1: Operations Console */}
-          {activeTab === "console" && (
-            <>
-              <CommitRevealDispatcher
-                onRunComplete={loadData}
-                initialFaultClass={fault}
-                injectedThreat={threat}
-              />
-              <EnclaveTopology
-                activeFault={fault}
-                selectedRun={selected}
-                onOpenDagModal={() => setDagOpen(true)}
-              />
-              <div className="workspace-grid">
-                <MerkleTreeVisualizer
-                  runs={runs}
-                  selectedRun={selected}
-                  onSelectRun={setSelected}
-                  onTamperToggled={loadData}
+        {sidebarOpen && (
+          <button
+            className="aegis-sidebar-scrim"
+            aria-label="Close navigation"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        <div className="aegis-main">
+          <header className="aegis-topbar">
+            <div className="aegis-topbar-left">
+              <button
+                className="aegis-mobile-menu"
+                onClick={() => setSidebarOpen((open) => !open)}
+                aria-label={sidebarOpen ? "Close navigation" : "Open navigation"}
+                aria-expanded={sidebarOpen}
+              >
+                {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
+              </button>
+              <span className="aegis-breadcrumb">
+                <span>AEGISBAY</span>
+                <span aria-hidden="true">/</span>
+                <strong>{selectedTab.label}</strong>
+              </span>
+            </div>
+
+            <div className="aegis-topbar-actions">
+              <div className={`aegis-connection${error ? " is-offline" : ""}`} role="status">
+                <img
+                  src="/aegisbay/connection-indicator.svg"
+                  alt=""
+                  width={7}
+                  height={7}
                 />
-                <TinyFishSentinelCard onLoadThreatIntoDispatcher={loadThreat} />
+                <span>{connectionLabel}</span>
+                <small>{sync ? `Synced ${sync}` : ""}</small>
               </div>
-            </>
-          )}
-
-          {/* Tab 2: Frontier Model SEAL Leaderboard */}
-          {activeTab === "leaderboard" && (
-            <div className="workspace-column">
-              <SealLeaderboard />
+              <button
+                className="button aegis-refresh"
+                onClick={() => void loadData()}
+                disabled={refreshing}
+                aria-label="Refresh workspace data"
+              >
+                <RefreshCw size={15} className={refreshing ? "spin" : ""} />
+                <span>Refresh</span>
+              </button>
+              {isAuthenticated && user ? (
+                <div className="aegis-account">
+                  <span className="aegis-account-avatar">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt="" width={28} height={28} />
+                    ) : (
+                      <UserIcon size={15} />
+                    )}
+                  </span>
+                  <span className="aegis-account-name">{user.name.split(" ")[0]}</span>
+                  <button
+                    className="aegis-account-logout"
+                    onClick={logout}
+                    aria-label="Sign out"
+                    title="Sign out"
+                  >
+                    <LogOut size={14} />
+                  </button>
+                </div>
+              ) : (
+                <button className="text-action aegis-sign-in" onClick={() => setAuthModalOpen(true)}>
+                  <UserIcon size={15} />
+                  <span>Sign in</span>
+                </button>
+              )}
             </div>
-          )}
+          </header>
 
-          {/* Tab 3: Constitutional Red Team */}
-          {activeTab === "redteam" && (
-            <div className="workspace-column">
-              <ConstitutionalRedTeam onRunDispatched={loadData} />
+          <main id="workspace" className="aegis-workspace" tabIndex={-1}>
+            <div className="aegis-page-heading">
+              <div>
+                <h1>{pageTitle}</h1>
+                <p>{pageDescription}</p>
+              </div>
+              {activeTab !== "console" && (
+                <button className="button button-primary" onClick={() => selectTab("console")}>
+                  <ShieldCheck size={15} />
+                  New evaluation
+                </button>
+              )}
             </div>
-          )}
 
-          {/* Tab 4: Lakera Threat Shield */}
-          {activeTab === "guard" && (
-            <div className="workspace-column">
-              <LakeraGuardShield onRunDispatched={loadData} />
+            <div className="aegis-disclosure" role="note">
+              <span className="aegis-disclosure-icon">
+                <ShieldAlert size={15} />
+              </span>
+              <span>
+                <strong>Synthetic execution</strong>
+                <small>
+                  Workers simulate tests and checks. Results demonstrate the audit flow, not model behavior.
+                </small>
+              </span>
             </div>
-          )}
 
-          {/* Tab 5: Evidence Ledger */}
-          {activeTab === "ledger" && (
-            <EvidenceLedgerView
-              runs={runs}
-              selectedRun={selected}
-              onSelectRun={setSelected}
-              onTamperToggled={loadData}
-            />
-          )}
-
-          {/* Tab 6: Sentinel Defense */}
-          {activeTab === "sentinel" && (
-            <div className="workspace-column">
-              <TinyFishSentinelCard onLoadThreatIntoDispatcher={loadThreat} />
-              <EnclaveTopology
-                activeFault={fault}
-                selectedRun={selected}
-                onOpenDagModal={() => setDagOpen(true)}
-              />
+            <div className="aegis-ledger-summary">
+              <span className="ledger-summary-count">
+                {stats ? `${stats.total_runs} signed receipts` : "Loading receipts"}
+              </span>
+              <img src="/aegisbay/divider.svg" alt="" width={4} height={4} />
+              <span className="ledger-summary-state">
+                {stats?.ledger_verification === "VERIFIED"
+                  ? "Ledger verified"
+                  : stats?.ledger_verification === "TAMPER_DETECTED"
+                    ? "Tampering detected"
+                    : stats?.ledger_verification === "EMPTY"
+                      ? "Ledger empty"
+                      : "Checking ledger"}
+              </span>
+              {activeTab !== "ledger" && (
+                <button className="ledger-summary-link" onClick={() => selectTab("ledger")}>
+                  Inspect receipts <span aria-hidden="true">→</span>
+                </button>
+              )}
             </div>
-          )}
 
-          {/* Tab 7: Paired Ablation Lab */}
-          {activeTab === "ablation" && (
-            <div className="workspace-column">
-              <PairedMatrixComparator matrix={matrix} onTriggerComplete={loadData} />
-            </div>
-          )}
+            <ErrorNotice message={error} />
 
-          {/* Tab 8: Subnet Topology */}
-          {activeTab === "topology" && (
-            <div className="workspace-column">
-              <EnclaveTopology
-                activeFault={fault}
-                selectedRun={selected}
-                onOpenDagModal={() => setDagOpen(true)}
-              />
-              <div className="workspace-grid">
-                <MerkleTreeVisualizer
-                  runs={runs}
-                  selectedRun={selected}
-                  onSelectRun={setSelected}
-                  onTamperToggled={loadData}
+            {activeTab === "console" && (
+              <div className="aegis-dashboard-grid">
+                <CommitRevealDispatcher
+                  onRunCompleted={(run) => {
+                    setSelected(run);
+                    void loadData();
+                  }}
+                  onFaultSelect={setFault}
+                  threat={threat}
                 />
-                <TinyFishSentinelCard onLoadThreatIntoDispatcher={loadThreat} />
+                <RecentRunsCard
+                  runs={runs}
+                  onOpenLedger={() => selectTab("ledger")}
+                  onSelectRun={openSelectedRun}
+                />
               </div>
-            </div>
-          )}
-        </main>
+            )}
 
-        <footer className="workspace-footer">
-          <span className="fingerprint">
-            <Fingerprint size={15} />
-            <span>Signing key</span>
-            <code>
-              {stats?.enclave_public_key_fingerprint || "Awaiting mediator"}
-            </code>
-            {stats && (
-              <CopyButton
-                value={stats.enclave_public_key_fingerprint}
-                label="Copy signing key fingerprint"
+            {activeTab === "leaderboard" && (
+              <div className="workspace-column"><SealLeaderboard /></div>
+            )}
+            {activeTab === "redteam" && (
+              <div className="workspace-column">
+                <ConstitutionalRedTeam onRunDispatched={loadData} />
+              </div>
+            )}
+            {activeTab === "guard" && (
+              <div className="workspace-column">
+                <LakeraGuardShield onRunDispatched={loadData} />
+              </div>
+            )}
+            {activeTab === "ledger" && (
+              <EvidenceLedgerView
+                runs={runs}
+                selectedRun={selected}
+                onSelectRun={setSelected}
+                onTamperToggled={loadData}
               />
             )}
-          </span>
-          <span>
-            {runs.length} recent receipts · Last sync {sync || "pending"}
-          </span>
-        </footer>
+            {activeTab === "sentinel" && (
+              <div className="workspace-column">
+                <TinyFishSentinelCard onLoadThreatIntoDispatcher={loadThreat} />
+              </div>
+            )}
+            {activeTab === "ablation" && (
+              <div className="workspace-column">
+                <PairedMatrixComparator matrix={matrix} onTriggerComplete={loadData} />
+              </div>
+            )}
+            {activeTab === "topology" && (
+              <div className="workspace-column">
+                <EnclaveTopology
+                  activeFault={fault}
+                  selectedRun={selected}
+                  onOpenDagModal={() => setDagOpen(true)}
+                />
+              </div>
+            )}
+
+            <footer className="aegis-workspace-footer">
+              <span className="aegis-fingerprint">
+                <Fingerprint size={14} />
+                <span>Signing key</span>
+                <code>{stats?.enclave_public_key_fingerprint || "Awaiting mediator"}</code>
+                {stats && (
+                  <CopyButton
+                    value={stats.enclave_public_key_fingerprint}
+                    label="Copy signing key fingerprint"
+                  />
+                )}
+              </span>
+              <span>{runs.length} recent receipts</span>
+            </footer>
+          </main>
+        </div>
 
         <TopologyDagModal isOpen={dagOpen} onClose={() => setDagOpen(false)} />
-        <AuthModal
-          isOpen={authModalOpen}
-          onClose={() => setAuthModalOpen(false)}
-        />
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
       </div>
     </MotionConfig>
   );
